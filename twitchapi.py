@@ -1,4 +1,5 @@
 import json
+import sys
 import webbrowser
 from typing import List
 
@@ -14,7 +15,7 @@ def authorize() -> str:
     while 1:
         value = easygui.enterbox(msg=MSG_ACCESS_TOKEN, title=TITLE_ACCESS_TOKEN, strip=True)
         if value is None:
-            exit(1)
+            sys.exit(1)
         with open("oauth.txt", "w") as f:
             f.write(value)
         if validateOAuth():
