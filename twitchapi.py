@@ -8,6 +8,7 @@ import requests
 
 from constants import TWITCH_OAUTH_LINK, CLIENT_ID, SCOPES, REDIRECT_URI, RESPONSE_TYPE, TWITCH_VALIDATE_LINK, TWITCH_LIVE_FOLLOWED_LINK, V5_JSON, MSG_ACCESS_TOKEN, \
     TITLE_ACCESS_TOKEN
+from sanitize import sanitize
 
 def authorize() -> str:
     oauthURL = TWITCH_OAUTH_LINK + "?&scope=" + SCOPES + "&response_type=" + RESPONSE_TYPE + "&client_id=" + CLIENT_ID + "&redirect_uri=" + REDIRECT_URI
@@ -44,6 +45,9 @@ def getLiveFollowedStreams(oAuth: str) -> List[str]:
     liveStreams = []
     if jsonStreams["streams"] is not None:
         for stream in jsonStreams["streams"]:
-            liveStreams.append(
-                stream['channel']["display_name"] + " playing " + stream['game'] + " for " + str(stream['viewers']) + " viewers (" + stream['channel']['status'] + ")")
+            gameTitle = sanitize(stream['game'])
+            streamTitle = sanitize(stream['channel']['status'])
+            streamersName = sanitize(stream['channel']["display_name"])
+            viewerCount = sanitize(str(stream['viewers']))
+            liveStreams.append(streamersName + " playing " + gameTitle + " for " + viewerCount + " viewers (" + streamTitle + ")")
     return liveStreams
