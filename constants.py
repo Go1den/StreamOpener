@@ -12,6 +12,7 @@ V5_JSON = "application/vnd.twitchtv.v5+json"
 
 ORDERED_STREAMING_SITES = OrderedDict()
 ORDERED_STREAMING_SITES['Kadgar'] = "https://kadgar.net/live/"
+ORDERED_STREAMING_SITES['MultiStream'] = "https://multistre.am/"
 ORDERED_STREAMING_SITES['MultiTwitch'] = "https://multitwitch.tv/"
 ORDERED_STREAMING_SITES['TwitchTheater'] = "https://twitchtheater.tv/"
 
