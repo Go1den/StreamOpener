@@ -47,7 +47,7 @@ def getLiveFollowedStreams(oAuth: str) -> List[str]:
         for stream in jsonStreams["streams"]:
             gameTitle = sanitize(stream['game'])
             streamTitle = sanitize(stream['channel']['status'])
-            streamersName = sanitize(stream['channel']["display_name"])
+            streamersName = sanitize(stream['channel']["name"])
             viewerCount = sanitize(str(stream['viewers']))
             liveStreams.append(streamersName + " playing " + gameTitle + " for " + viewerCount + " viewers (" + streamTitle + ")")
     return liveStreams
