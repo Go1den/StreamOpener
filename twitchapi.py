@@ -9,6 +9,7 @@ import requests
 from constants import TWITCH_OAUTH_LINK, CLIENT_ID, SCOPES, REDIRECT_URI, RESPONSE_TYPE, TWITCH_VALIDATE_LINK, TWITCH_LIVE_FOLLOWED_LINK, V5_JSON, MSG_ACCESS_TOKEN, \
     TITLE_ACCESS_TOKEN
 from sanitize import sanitize
+from stream import Stream
 
 def authorize() -> str:
     oauthURL = TWITCH_OAUTH_LINK + "?&scope=" + SCOPES + "&response_type=" + RESPONSE_TYPE + "&client_id=" + CLIENT_ID + "&redirect_uri=" + REDIRECT_URI
@@ -33,7 +34,7 @@ def validateOAuth() -> bool:
     response = requests.get(TWITCH_VALIDATE_LINK, headers=parameters)
     return "client_id" in response.text
 
-def getLiveFollowedStreams(oAuth: str) -> List[str]:
+def getLiveFollowedStreams(oAuth: str) -> List[Stream]:
     parameters = {
         "Authorization": "OAuth " + oAuth,
         "Client-ID": CLIENT_ID,
@@ -46,8 +47,11 @@ def getLiveFollowedStreams(oAuth: str) -> List[str]:
     if jsonStreams["streams"] is not None:
         for stream in jsonStreams["streams"]:
             gameTitle = sanitize(stream['game'])
+            previewImage = stream['preview']['medium']
+            streamName = sanitize(stream['channel']["name"])
             streamTitle = sanitize(stream['channel']['status'])
-            streamersName = sanitize(stream['channel']["name"])
+            stylizedStreamName = stream['channel']['display_name']
             viewerCount = sanitize(str(stream['viewers']))
-            liveStreams.append(streamersName + " playing " + gameTitle + " for " + viewerCount + " viewers (" + streamTitle + ")")
+            liveStreams.append(Stream(gameTitle, previewImage, streamName, streamTitle, stylizedStreamName, viewerCount))
+    print(liveStreams)
     return liveStreams

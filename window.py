@@ -21,19 +21,19 @@ class Window:
         self.window.title(LABEL_STREAMOPENER)
 
     def addListbox(self):
-        scrollbar = Scrollbar(self.window)
-        scrollbar.grid(sticky=NS)
-        listbox = Listbox(self.window, selectmode=MULTIPLE, yscrollcommand=scrollbar)
+        frameListBox = Frame(self.window)
+        frameListBox.grid(row=0, column=0, columnspan=2, sticky=NSEW)
+        scrollbar = Scrollbar(frameListBox)
+        scrollbar.grid(row=0, column=1, sticky="NWS")
+        listbox = Listbox(frameListBox, selectmode=MULTIPLE, yscrollcommand=scrollbar.set)
         scrollbar.config(command=listbox.yview)
         for stream in self.streams:
-            listbox.insert(END, stream.split(" ")[0])
-        listbox.grid(row=0, column=0, columnspan=2, sticky=NSEW, padx=4, pady=4)
+            print(stream.stylizedStreamName)
+            listbox.insert(END, stream.stylizedStreamName)
+        listbox.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
 
     def addFrame(self):
         labelSiteDropdown = Label(self.window, text=LABEL_STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
         siteDropdown = Combobox(self.window, textvariable=self.site, state="readonly", values=list(ORDERED_STREAMING_SITES.keys()))
         siteDropdown.grid(row=1, column=1, sticky=NSEW, padx=4, pady=4)
-
-w = Window()
-w.window.mainloop()
