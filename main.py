@@ -1,10 +1,4 @@
-import sys
-import webbrowser
-
-import easygui
-
-from constants import MSG_SELECT_STREAMS, TITLE_SELECT_STREAMS, TITLE_SELECT_SITE, MSG_SELECT_SITE, ORDERED_STREAMING_SITES
-from twitchapi import authorize, validateOAuth, getLiveFollowedStreams
+from twitchapi import authorize, validateOAuth
 from window import Window
 
 oAuth = None

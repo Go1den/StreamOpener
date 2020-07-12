@@ -6,3 +6,9 @@ class Stream:
         self.streamTitle = streamTitle
         self.stylizedStreamName = stylizedStreamName
         self.viewerCount = viewerCount
+
+    def isLive(self, streams) -> bool:
+        for stream in streams:
+            if stream.streamName == self.streamName:
+                return True
+        return False

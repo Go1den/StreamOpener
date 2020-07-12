@@ -1,8 +1,7 @@
 import io
 import sys
 import webbrowser
-from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox
-from tkinter.messagebox import ERROR
+from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
 
@@ -33,7 +32,8 @@ class Window:
 
         self.streamFrame = Frame(self.window)
         self.urlFrame = Frame(self.window)
-        self.previewFrame = Frame(self.window, bd=2, relief=GROOVE, width=352, height=274)
+        self.previewLabelFrame = Frame(self.window)
+        self.previewFrame = Frame(self.window, bd=2, relief=GROOVE, width=350, height=274)
         self.okFrame = Frame(self.window)
 
         self.initializeWindow()
@@ -43,25 +43,30 @@ class Window:
         self.addListBoxButtons()
         self.addSelectedListbox()
         self.addDropdown()
+        self.addPreviewLabel()
         self.addPreview()
         self.addOkButton()
 
+    def addPreviewLabel(self):
+        labelPreview = Label(self.previewLabelFrame, text="Preview")
+        labelPreview.grid(sticky=NSEW)
+
     def addOkButton(self):
-        buttonOk = Button(self.okFrame, text="Take me to the streams!", width=50, command=lambda: self.openURL())
+        buttonOk = Button(self.okFrame, text="Take me to the streams!", width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def initializeWindow(self):
         self.window.iconbitmap(STREAMOPENER_ICON)
-        self.window.geometry('376x580')
+        self.window.geometry('380x600')
         self.window.title(LABEL_STREAMOPENER)
 
     def gridFrames(self):
         self.streamFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
-        self.urlFrame.grid(row=1, sticky=NSEW, padx=4, pady=4)
-        self.previewFrame.grid(row=2, sticky=NSEW, padx=(12,4), pady=4)
+        self.urlFrame.grid(row=1, sticky=NSEW, padx=8, pady=4)
+        self.previewLabelFrame.grid(row=2, sticky=NSEW, padx=12)
+        self.previewFrame.grid(row=3, sticky=NSEW, padx=(12,6), pady=(2,4))
         self.previewFrame.grid_propagate(False)
-        self.okFrame.grid(row=3, sticky=NSEW, padx=(8, 4), pady=4)
-        # TODO: Padding is all fricked up
+        self.okFrame.grid(row=4, sticky=NSEW, padx=(8, 4), pady=4)
 
     def addMenu(self):
         menu = Menu(self.window)
@@ -84,7 +89,7 @@ class Window:
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
         frameLiveListBox.grid(row=0, column=0, sticky=NSEW, padx=4, pady=(0, 4))
-        labelLiveListBox = Label(frameLiveListBox, text="Live Streams:")
+        labelLiveListBox = Label(frameLiveListBox, text="Live Streams")
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameLiveListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -113,7 +118,7 @@ class Window:
     def addSelectedListbox(self):
         frameSelectedListBox = Frame(self.streamFrame)
         frameSelectedListBox.grid(row=0, column=2, sticky=NSEW, pady=(0, 4))
-        labelLiveListBox = Label(frameSelectedListBox, text="Selected Streams:")
+        labelLiveListBox = Label(frameSelectedListBox, text="Selected Streams")
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameSelectedListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -127,7 +132,7 @@ class Window:
         self.previewGame.set("Game: ")
         self.previewName.set("Streamer: ")
         self.previewViewers.set("Viewers: ")
-        self.labelImage = Label(self.previewFrame, image=self.previewImage)
+        self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
         self.labelImage.grid(row=0)
         labelTitle = Label(self.previewFrame, textvariable=self.previewTitle)
         labelTitle.grid(row=1, sticky=W)
@@ -148,7 +153,7 @@ class Window:
             changedSelection = w.curselection()
         selectedStreamName = w.get(int(list(changedSelection)[0]))
         self.updatePreviewFrame(selectedStreamName)
-        print(self.selectedStreams)
+        # TODO: thread the preview update?
 
     def onSelectSelectedListBox(self, event):
         w = event.widget
@@ -160,7 +165,7 @@ class Window:
             changedSelection = w.curselection()
         unselectedStreamName = w.get(int(list(changedSelection)[0]))
         self.updatePreviewFrame(unselectedStreamName)
-        print(self.unselectedStreams)
+        # TODO: thread the preview update?
 
     def selectStreams(self):
         if self.selectedStreams:
@@ -188,8 +193,15 @@ class Window:
         self.populateLiveListBox()
         self.selectedStreams = None
         self.unselectedStreams = None
+        self.resetPreview()
+
+    def resetPreview(self):
         self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
         self.labelImage.configure(image=self.previewImage)
+        self.previewTitle.set("Title will appear here.")
+        self.previewGame.set("Game: ")
+        self.previewName.set("Name: ")
+        self.previewViewers.set("Viewers: ")
 
     def addDropdown(self):
         labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
@@ -203,7 +215,10 @@ class Window:
             self.previewTitle.set(thisStream.streamTitle[:50] + "...")
         else:
             self.previewTitle.set(thisStream.streamTitle)
-        self.previewGame.set("Game: " + thisStream.gameTitle)
+        if len(thisStream.gameTitle) > 45:
+            self.previewGame.set("Game: " + thisStream.streamTitle[:45] + "...")
+        else:
+            self.previewGame.set("Game: " + thisStream.gameTitle)
         self.previewName.set("Streamer: " + thisStream.streamName)
         self.previewViewers.set("Viewers: " + thisStream.viewerCount)
         self.getImageFromURL(thisStream.previewImage)
@@ -215,12 +230,26 @@ class Window:
         self.labelImage.configure(image=self.previewImage)
 
     def refresh(self):
-        getLiveFollowedStreams(self.oauth)
-        # TODO: refresh lists
+        refreshStreams = getLiveFollowedStreams(self.oauth)
+        tmpLiveList = refreshStreams
+        tmpSelectedList = []
+        for stylizedStreamName in self.selectedListBox.get(0, END):
+            stream = [stream for stream in self.streams if stream.stylizedStreamName == stylizedStreamName][0]
+            if stream.isLive(refreshStreams):
+                tmpSelectedList.append(stream)
+            else:
+                self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
+        self.liveListBox.delete(0, END)
+        tmpLiveList = [stream for stream in tmpLiveList if stream not in tmpSelectedList]
+        for stream in tmpLiveList:
+            self.liveListBox.insert(END, stream.stylizedStreamName)
+        self.streams = refreshStreams
+        self.resetPreview()
 
     def openURL(self):
         watchingOnTwitch = False
-        if len(self.selectedListBox.get(0, END)) == 1 and messagebox.askyesno("Twitch", "Only one stream was selected. Would you like to watch on Twitch instead of your selected site?"):
+        if len(self.selectedListBox.get(0, END)) == 1 and messagebox.askyesno("Twitch",
+                                                                              "Only one stream was selected. Would you like to watch on Twitch instead of your selected site?"):
             finalURL = "https://twitch.tv/"
             watchingOnTwitch = True
         if not watchingOnTwitch and not self.siteDropdown.get():
