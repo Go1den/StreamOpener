@@ -1,5 +1,6 @@
 import io
 import sys
+import threading
 import webbrowser
 from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED
 from tkinter.ttk import Combobox
@@ -152,8 +153,7 @@ class Window:
             self.selectedStreams = w.curselection()
             changedSelection = w.curselection()
         selectedStreamName = w.get(int(list(changedSelection)[0]))
-        self.updatePreviewFrame(selectedStreamName)
-        # TODO: thread the preview update?
+        threading.Thread(target=self.updatePreviewFrame(selectedStreamName)).start()
 
     def onSelectSelectedListBox(self, event):
         w = event.widget
@@ -164,8 +164,7 @@ class Window:
             self.unselectedStreams = w.curselection()
             changedSelection = w.curselection()
         unselectedStreamName = w.get(int(list(changedSelection)[0]))
-        self.updatePreviewFrame(unselectedStreamName)
-        # TODO: thread the preview update?
+        threading.Thread(target=self.updatePreviewFrame(unselectedStreamName)).start()
 
     def selectStreams(self):
         if self.selectedStreams:
@@ -236,11 +235,14 @@ class Window:
         for stylizedStreamName in self.selectedListBox.get(0, END):
             stream = [stream for stream in self.streams if stream.stylizedStreamName == stylizedStreamName][0]
             if stream.isLive(refreshStreams):
+                print("appending " + stream.stylizedStreamName)
                 tmpSelectedList.append(stream)
             else:
                 self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
         self.liveListBox.delete(0, END)
-        tmpLiveList = [stream for stream in tmpLiveList if stream not in tmpSelectedList]
+        tmpLiveList = [stream for stream in tmpLiveList if stream.stylizedStreamName not in [stream.stylizedStreamName for stream in tmpSelectedList]]
+        print(tmpSelectedList)
+        print(tmpLiveList)
         for stream in tmpLiveList:
             self.liveListBox.insert(END, stream.stylizedStreamName)
         self.streams = refreshStreams
