@@ -199,7 +199,7 @@ class Window:
         self.labelImage.configure(image=self.previewImage)
         self.previewTitle.set("Title will appear here.")
         self.previewGame.set("Game: ")
-        self.previewName.set("Name: ")
+        self.previewName.set("Streamer: ")
         self.previewViewers.set("Viewers: ")
 
     def addDropdown(self):
