@@ -39,7 +39,7 @@ def getLiveFollowedStreams(oAuth: str) -> List[Stream]:
         "Authorization": "OAuth " + oAuth,
         "Client-ID": CLIENT_ID,
         "Accept": V5_JSON,
-        "limit": "100"
+        "limit": 100
     }
     response = requests.get(TWITCH_LIVE_FOLLOWED_LINK, headers=parameters)
     jsonStreams = json.loads(response.text)
