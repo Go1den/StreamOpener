@@ -60,6 +60,7 @@ class Window:
         self.window.iconbitmap(STREAMOPENER_ICON)
         self.window.geometry('380x600')
         self.window.title(LABEL_STREAMOPENER)
+        self.window.resizable(width=False, height=False)
 
     def gridFrames(self):
         self.streamFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
