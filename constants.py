@@ -6,7 +6,8 @@ STREAMOPENER_ICON = 'streamopenericon.ico'
 
 TWITCH_VALIDATE_LINK = "https://id.twitch.tv/oauth2/validate"
 TWITCH_OAUTH_LINK = "https://id.twitch.tv/oauth2/authorize"
-TWITCH_LIVE_FOLLOWED_LINK = "https://api.twitch.tv/kraken/streams/followed"
+TWITCH_USER_FOLLOWS_LINK = "https://api.twitch.tv/helix/users/follows"
+TWITCH_LIVE_FOLLOWED_LINK = "https://api.twitch.tv/helix/streams"
 SCOPES = "user_read"
 RESPONSE_TYPE = "token"
 REDIRECT_URI = "http://www.go1den.com/streamopener-oauth/"
