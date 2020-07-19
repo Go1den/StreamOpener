@@ -19,7 +19,7 @@ class AboutWindow:
         self.aboutImageLabel = Label(self.frameTop, image=self.aboutImage)
         self.aboutImageLabel.grid(row=0, column=0, padx=4, pady=4)
 
-        self.aboutLabel = Label(self.frameTop, text="StreamOpener\n\nVersion 2.0\n\nReleased: 7/13/2020", justify=LEFT)
+        self.aboutLabel = Label(self.frameTop, text="StreamOpener\n\nVersion 2.1\n\nReleased: 7/19/2020", justify=LEFT)
         self.aboutLabel.grid(row=0, column=1, sticky=W, pady=4)
 
         self.frameTop.grid(row=0, column=0, sticky=W)
