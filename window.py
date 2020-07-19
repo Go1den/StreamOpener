@@ -15,6 +15,7 @@ from twitchapi import getLiveFollowedStreams
 class Window:
     def __init__(self, oauth=None):
         self.window = Tk()
+        self.window.withdraw()
         self.site = StringVar()
         self.oauth = oauth
         self.streams = getLiveFollowedStreams(self.oauth)
@@ -47,6 +48,7 @@ class Window:
         self.addPreviewLabel()
         self.addPreview()
         self.addOkButton()
+        self.window.deiconify()
 
     def addPreviewLabel(self):
         labelPreview = Label(self.previewLabelFrame, text="Preview")
