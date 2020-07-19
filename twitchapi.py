@@ -79,7 +79,7 @@ def getLiveStreamsUserFollows(oAuth: str, streams: List[List[str]]) -> List[Stre
                 try:
                     game = [game for game in gameInformation['data'] if game['id'] == stream['game_id']][0]
                     gameTitle = game['name']
-                    boxArtURL = game['box_art_url']
+                    boxArtURL = game['box_art_url'].replace('{width}', '52').replace('{height}', '72')
                 except IndexError:
                     gameTitle = "N/A"
                     boxArtURL = ""

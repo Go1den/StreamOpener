@@ -44,3 +44,6 @@ LABEL_STREAMER = "Streamer: "
 LABEL_VIEWERS = "Viewers: "
 LABEL_TWITCH = "Twitch"
 LABEL_ERROR = "Error"
+
+FILE_PREVIEW_BOX_ART = "previewboxart.png"
+FILE_STREAM_PREVIEW = "streampreview.png"

@@ -9,7 +9,7 @@ from PIL import ImageTk, Image
 
 from aboutWindow import AboutWindow
 from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
-    MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE
+    MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW
 from twitchapi import getLiveFollowedStreams
 
 class Window:
@@ -21,7 +21,8 @@ class Window:
         self.streams = getLiveFollowedStreams(self.oauth)
         self.selectedStreams = None
         self.unselectedStreams = None
-        self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
+        self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
+        self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
         self.previewTitle = StringVar()
         self.previewName = StringVar()
         self.previewGame = StringVar()
@@ -39,7 +40,8 @@ class Window:
         self.streamFrame = Frame(self.window)
         self.urlFrame = Frame(self.window)
         self.previewLabelFrame = Frame(self.window)
-        self.previewFrame = Frame(self.window, bd=2, relief=GROOVE, width=350, height=274)
+        self.previewFrame = Frame(self.window, bd=2, relief=GROOVE, width=350, height=290)
+        self.previewFrame.grid_columnconfigure(1, weight=1)
         self.okFrame = Frame(self.window)
 
         self.initializeWindow()
@@ -64,7 +66,7 @@ class Window:
 
     def initializeWindow(self):
         self.window.iconbitmap(STREAMOPENER_ICON)
-        self.window.geometry('380x600')
+        self.window.geometry('380x620')
         self.window.title(LABEL_STREAMOPENER)
         self.window.resizable(width=False, height=False)
 
@@ -154,15 +156,21 @@ class Window:
     def addPreview(self):
         self.setDefaultPreviewLabels()
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
-        self.labelImage.grid(row=0)
+        self.labelImage.grid(row=0, sticky=W, columnspan=2)
         labelTitle = Label(self.previewFrame, textvariable=self.previewTitle)
-        labelTitle.grid(row=1, sticky=W)
-        labelName = Label(self.previewFrame, textvariable=self.previewName)
-        labelName.grid(row=2, sticky=W)
-        labelGame = Label(self.previewFrame, textvariable=self.previewGame)
-        labelGame.grid(row=3, sticky=W)
-        labelViewers = Label(self.previewFrame, textvariable=self.previewViewers)
-        labelViewers.grid(row=4, sticky=W)
+        labelTitle.grid(row=1, sticky=W, columnspan=2)
+        boxArtFrame = Frame(self.previewFrame)
+        boxArtFrame.grid(row=2, column=0, sticky=NSEW)
+        self.labelBoxArt = Label(boxArtFrame, image=self.boxArtImage, bd=1, width=52, height=72)
+        self.labelBoxArt.grid(row=0, column=0, sticky=W)
+        boxArtLabelFrame = Frame(self.previewFrame)
+        boxArtLabelFrame.grid(row=2, column=1, sticky=NSEW)
+        labelName = Label(boxArtLabelFrame, textvariable=self.previewName, anchor=W)
+        labelName.grid(row=0, sticky=W)
+        labelGame = Label(boxArtLabelFrame, textvariable=self.previewGame)
+        labelGame.grid(row=1, sticky=W)
+        labelViewers = Label(boxArtLabelFrame, textvariable=self.previewViewers)
+        labelViewers.grid(row=2, sticky=W)
 
     # TODO: condense these methods into one common method
     def onSelectLiveListbox(self, event):
@@ -235,8 +243,10 @@ class Window:
         self.previewViewers.set(LABEL_VIEWERS)
 
     def resetPreview(self):
-        self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
+        self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
         self.labelImage.configure(image=self.previewImage)
+        self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
+        self.labelBoxArt.configure(image=self.boxArtImage)
         self.setDefaultPreviewLabels()
 
     def addDropdown(self):
@@ -257,13 +267,18 @@ class Window:
             self.previewGame.set(LABEL_GAME + thisStream.gameTitle)
         self.previewName.set(LABEL_STREAMER + thisStream.streamName)
         self.previewViewers.set(LABEL_VIEWERS + thisStream.viewerCount)
-        self.getImageFromURL(thisStream.previewImage)
-
-    def getImageFromURL(self, url):
-        rawData = urlopen(url).read()
-        im = Image.open(io.BytesIO(rawData))
-        self.previewImage = ImageTk.PhotoImage(im)
+        self.previewImage = self.getImageFromURL(thisStream.previewImage, ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW)))
         self.labelImage.configure(image=self.previewImage)
+        self.boxArtImage = self.getImageFromURL(thisStream.boxArtURL, ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART)))
+        self.labelBoxArt.configure(image=self.boxArtImage)
+
+    def getImageFromURL(self, url, defaultImage) -> ImageTk.PhotoImage:
+        try:
+            rawData = urlopen(url).read()
+            im = Image.open(io.BytesIO(rawData))
+            return ImageTk.PhotoImage(im)
+        except ValueError:
+            return defaultImage
 
     def refresh(self):
         refreshStreams = getLiveFollowedStreams(self.oauth)
