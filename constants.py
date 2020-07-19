@@ -4,10 +4,13 @@ CLIENT_ID = "dzdcecm2nwr4j6ywb349cyvv81i9sv"
 
 STREAMOPENER_ICON = 'streamopenericon.ico'
 
+BEARER = "Bearer "
+
 TWITCH_VALIDATE_LINK = "https://id.twitch.tv/oauth2/validate"
 TWITCH_OAUTH_LINK = "https://id.twitch.tv/oauth2/authorize"
 TWITCH_USER_FOLLOWS_LINK = "https://api.twitch.tv/helix/users/follows"
 TWITCH_LIVE_FOLLOWED_LINK = "https://api.twitch.tv/helix/streams"
+TWITCH_GAME_INFO_LINK = "https://api.twitch.tv/helix/games"
 SCOPES = "user_read"
 RESPONSE_TYPE = "token"
 REDIRECT_URI = "http://www.go1den.com/streamopener-oauth/"
