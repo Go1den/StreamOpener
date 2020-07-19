@@ -257,14 +257,11 @@ class Window:
         for stylizedStreamName in self.selectedListBox.get(0, END):
             stream = [stream for stream in self.streams if stream.stylizedStreamName == stylizedStreamName][0]
             if stream.isLive(refreshStreams):
-                print("appending " + stream.stylizedStreamName)
                 tmpSelectedList.append(stream)
             else:
                 self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
         self.liveListBox.delete(0, END)
         tmpLiveList = [stream for stream in tmpLiveList if stream.stylizedStreamName not in [stream.stylizedStreamName for stream in tmpSelectedList]]
-        print(tmpSelectedList)
-        print(tmpLiveList)
         for stream in tmpLiveList:
             self.liveListBox.insert(END, stream.stylizedStreamName)
         self.streams = refreshStreams
