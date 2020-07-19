@@ -2,7 +2,7 @@ import io
 import sys
 import threading
 import webbrowser
-from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED
+from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
 
@@ -26,6 +26,10 @@ class Window:
         self.previewName = StringVar()
         self.previewGame = StringVar()
         self.previewViewers = StringVar()
+        self.singleSelectMode = BooleanVar()
+        self.multipleSelectMode = BooleanVar()
+        self.singleSelectMode.set(True)
+        self.multipleSelectMode.set(False)
 
         self.labelImage = None
         self.liveListBox = None
@@ -68,7 +72,7 @@ class Window:
         self.streamFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
         self.urlFrame.grid(row=1, sticky=NSEW, padx=8, pady=4)
         self.previewLabelFrame.grid(row=2, sticky=NSEW, padx=12)
-        self.previewFrame.grid(row=3, sticky=NSEW, padx=(12,6), pady=(2,4))
+        self.previewFrame.grid(row=3, sticky=NSEW, padx=(12, 6), pady=(2, 4))
         self.previewFrame.grid_propagate(False)
         self.okFrame.grid(row=4, sticky=NSEW, padx=(8, 4), pady=4)
 
@@ -84,6 +88,11 @@ class Window:
         fileMenu.add_command(label="Quit", command=lambda: self.closeWindow())
         menu.add_cascade(label="File", menu=fileMenu)
 
+        selectionMenu = Menu(menu, tearoff=0)
+        selectionMenu.add_checkbutton(label="Single", variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
+        selectionMenu.add_checkbutton(label="Multiple", variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
+        menu.add_cascade(label="Selection Mode", menu=selectionMenu)
+
         helpMenu = Menu(menu, tearoff=0)
         helpMenu.add_command(label="About", command=lambda: AboutWindow(self.window))
         menu.add_cascade(label="Help", menu=helpMenu)
@@ -97,11 +106,21 @@ class Window:
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameLiveListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
-        self.liveListBox = Listbox(frameLiveListBox, selectmode=MULTIPLE, yscrollcommand=scrollbar.set, activestyle=NONE)
+        self.liveListBox = Listbox(frameLiveListBox, selectmode=SINGLE, yscrollcommand=scrollbar.set, activestyle=NONE)
         scrollbar.config(command=self.liveListBox.yview)
         self.populateLiveListBox()
         self.liveListBox.bind('<<ListboxSelect>>', self.onSelectLiveListbox)
         self.liveListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
+
+    def setSelectionModes(self, isMultipleMode, selectionMode):
+        if isMultipleMode:
+            self.singleSelectMode.set(False)
+        else:
+            self.multipleSelectMode.set(False)
+        self.liveListBox.configure(selectmode=selectionMode)
+        self.selectedListBox.configure(selectmode=selectionMode)
+        self.liveListBox.selection_clear(0, END)
+        self.selectedListBox.selection_clear(0, END)
 
     def populateLiveListBox(self):
         for stream in self.streams:
@@ -126,7 +145,7 @@ class Window:
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameSelectedListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
-        self.selectedListBox = Listbox(frameSelectedListBox, selectmode=MULTIPLE, yscrollcommand=scrollbar.set, activestyle=NONE)
+        self.selectedListBox = Listbox(frameSelectedListBox, selectmode=SINGLE, yscrollcommand=scrollbar.set, activestyle=NONE)
         scrollbar.config(command=self.selectedListBox.yview)
         self.selectedListBox.bind('<<ListboxSelect>>', self.onSelectSelectedListBox)
         self.selectedListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
