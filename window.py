@@ -9,7 +9,7 @@ from urllib.request import urlopen
 from PIL import ImageTk, Image
 
 from aboutWindow import AboutWindow
-from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER
+from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS
 from twitchapi import getLiveFollowedStreams
 
 class Window:
@@ -152,9 +152,9 @@ class Window:
 
     def addPreview(self):
         self.previewTitle.set("Title will appear here.")
-        self.previewGame.set("Game: ")
-        self.previewName.set("Streamer: ")
-        self.previewViewers.set("Viewers: ")
+        self.previewGame.set(LABEL_GAME)
+        self.previewName.set(LABEL_STREAMER)
+        self.previewViewers.set(LABEL_VIEWERS)
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
         self.labelImage.grid(row=0)
         labelTitle = Label(self.previewFrame, textvariable=self.previewTitle)
@@ -220,9 +220,9 @@ class Window:
         self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
         self.labelImage.configure(image=self.previewImage)
         self.previewTitle.set("Title will appear here.")
-        self.previewGame.set("Game: ")
-        self.previewName.set("Streamer: ")
-        self.previewViewers.set("Viewers: ")
+        self.previewGame.set(LABEL_GAME)
+        self.previewName.set(LABEL_STREAMER)
+        self.previewViewers.set(LABEL_VIEWERS)
 
     def addDropdown(self):
         labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
@@ -237,11 +237,11 @@ class Window:
         else:
             self.previewTitle.set(thisStream.streamTitle)
         if len(thisStream.gameTitle) > 45:
-            self.previewGame.set("Game: " + thisStream.streamTitle[:45] + "...")
+            self.previewGame.set(LABEL_GAME + thisStream.streamTitle[:45] + "...")
         else:
-            self.previewGame.set("Game: " + thisStream.gameTitle)
-        self.previewName.set("Streamer: " + thisStream.streamName)
-        self.previewViewers.set("Viewers: " + thisStream.viewerCount)
+            self.previewGame.set(LABEL_GAME + thisStream.gameTitle)
+        self.previewName.set(LABEL_STREAMER + thisStream.streamName)
+        self.previewViewers.set(LABEL_VIEWERS + thisStream.viewerCount)
         self.getImageFromURL(thisStream.previewImage)
 
     def getImageFromURL(self, url):

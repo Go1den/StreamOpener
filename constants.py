@@ -33,3 +33,6 @@ TITLE_SELECT_SITE = "Select Website"
 
 LABEL_STREAM_DROPDOWN = "Open streams on:"
 LABEL_STREAMOPENER = "StreamOpener"
+LABEL_GAME = "Game: "
+LABEL_STREAMER = "Streamer: "
+LABEL_VIEWERS = "Viewers: "
