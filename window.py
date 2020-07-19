@@ -9,7 +9,8 @@ from urllib.request import urlopen
 from PIL import ImageTk, Image
 
 from aboutWindow import AboutWindow
-from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS
+from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
+    MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE
 from twitchapi import getLiveFollowedStreams
 
 class Window:
@@ -121,6 +122,7 @@ class Window:
         self.selectedListBox.configure(selectmode=selectionMode)
         self.liveListBox.selection_clear(0, END)
         self.selectedListBox.selection_clear(0, END)
+        self.resetPreview()
 
     def populateLiveListBox(self):
         for stream in self.streams:
@@ -151,10 +153,7 @@ class Window:
         self.selectedListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
     def addPreview(self):
-        self.previewTitle.set("Title will appear here.")
-        self.previewGame.set(LABEL_GAME)
-        self.previewName.set(LABEL_STREAMER)
-        self.previewViewers.set(LABEL_VIEWERS)
+        self.setDefaultPreviewLabels()
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
         self.labelImage.grid(row=0)
         labelTitle = Label(self.previewFrame, textvariable=self.previewTitle)
@@ -166,27 +165,39 @@ class Window:
         labelViewers = Label(self.previewFrame, textvariable=self.previewViewers)
         labelViewers.grid(row=4, sticky=W)
 
+    # TODO: condense these methods into one common method
     def onSelectLiveListbox(self, event):
         w = event.widget
-        if self.selectedStreams:
-            changedSelection = set(self.selectedStreams).symmetric_difference(set(w.curselection()))
-            self.selectedStreams = w.curselection()
+        if self.multipleSelectMode.get():
+            if self.selectedStreams:
+                changedSelection = set(self.selectedStreams).symmetric_difference(set(w.curselection()))
+                self.selectedStreams = w.curselection()
+            else:
+                self.selectedStreams = w.curselection()
+                changedSelection = w.curselection()
+            selectedStreamName = w.get(int(list(changedSelection)[0]))
+            self.updatePreviewFrame(selectedStreamName)
         else:
             self.selectedStreams = w.curselection()
-            changedSelection = w.curselection()
-        selectedStreamName = w.get(int(list(changedSelection)[0]))
-        threading.Thread(target=self.updatePreviewFrame(selectedStreamName)).start()
+            selectedStreamName = w.get(w.curselection())
+            self.updatePreviewFrame(selectedStreamName)
 
+    # TODO: condense these methods into one common method
     def onSelectSelectedListBox(self, event):
         w = event.widget
-        if self.unselectedStreams:
-            changedSelection = set(self.unselectedStreams).symmetric_difference(set(w.curselection()))
-            self.unselectedStreams = w.curselection()
+        if self.multipleSelectMode.get():
+            if self.unselectedStreams:
+                changedSelection = set(self.unselectedStreams).symmetric_difference(set(w.curselection()))
+                self.unselectedStreams = w.curselection()
+            else:
+                self.unselectedStreams = w.curselection()
+                changedSelection = w.curselection()
+            unselectedStreamName = w.get(int(list(changedSelection)[0]))
+            self.updatePreviewFrame(unselectedStreamName)
         else:
             self.unselectedStreams = w.curselection()
-            changedSelection = w.curselection()
-        unselectedStreamName = w.get(int(list(changedSelection)[0]))
-        threading.Thread(target=self.updatePreviewFrame(unselectedStreamName)).start()
+            unselectedStreamName = w.get(w.curselection())
+            self.updatePreviewFrame(unselectedStreamName)
 
     def selectStreams(self):
         if self.selectedStreams:
@@ -196,6 +207,7 @@ class Window:
                 self.liveListBox.delete(stream)
             self.liveListBox.selection_clear(0, END)
             self.selectedStreams = None
+            self.resetPreview()
 
     def unselectStreams(self):
         if self.unselectedStreams:
@@ -205,6 +217,7 @@ class Window:
                 self.selectedListBox.delete(stream)
             self.selectedListBox.selection_clear(0, END)
             self.unselectedStreams = None
+            self.resetPreview()
 
     def reset(self):
         self.liveListBox.selection_clear(0, END)
@@ -216,13 +229,16 @@ class Window:
         self.unselectedStreams = None
         self.resetPreview()
 
-    def resetPreview(self):
-        self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
-        self.labelImage.configure(image=self.previewImage)
-        self.previewTitle.set("Title will appear here.")
+    def setDefaultPreviewLabels(self):
+        self.previewTitle.set(LABEL_NO_TITLE)
         self.previewGame.set(LABEL_GAME)
         self.previewName.set(LABEL_STREAMER)
         self.previewViewers.set(LABEL_VIEWERS)
+
+    def resetPreview(self):
+        self.previewImage = ImageTk.PhotoImage(Image.open("streampreview.png"))
+        self.labelImage.configure(image=self.previewImage)
+        self.setDefaultPreviewLabels()
 
     def addDropdown(self):
         labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
@@ -269,12 +285,11 @@ class Window:
 
     def openURL(self):
         watchingOnTwitch = False
-        if len(self.selectedListBox.get(0, END)) == 1 and messagebox.askyesno("Twitch",
-                                                                              "Only one stream was selected. Would you like to watch on Twitch instead of your selected site?"):
-            finalURL = "https://twitch.tv/"
+        if len(self.selectedListBox.get(0, END)) == 1 and messagebox.askyesno(LABEL_TWITCH, MSG_WATCH_ON_TWITCH):
+            finalURL = TWITCH_LINK
             watchingOnTwitch = True
         if not watchingOnTwitch and not self.siteDropdown.get():
-            messagebox.showerror("Error", "No website selected.")
+            messagebox.showerror(LABEL_ERROR, MSG_NO_SITE_SELECTED)
         elif len(self.selectedListBox.get(0, END)) > 0:
             if not watchingOnTwitch:
                 finalURL = ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
@@ -284,7 +299,7 @@ class Window:
                         finalURL += stream.streamName + "/"
             webbrowser.open(finalURL, new=2)
         else:
-            messagebox.showerror("Error", "No streams selected.")
+            messagebox.showerror(LABEL_ERROR, MSG_NO_STREAMS_SELECTED)
 
     def closeWindow(self):
         sys.exit(0)
