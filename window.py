@@ -1,6 +1,5 @@
 import io
 import sys
-import threading
 import webbrowser
 from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
