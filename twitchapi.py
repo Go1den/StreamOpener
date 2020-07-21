@@ -7,7 +7,7 @@ import easygui
 import requests
 
 from constants import TWITCH_OAUTH_LINK, CLIENT_ID, SCOPES, REDIRECT_URI, RESPONSE_TYPE, TWITCH_VALIDATE_LINK, TWITCH_LIVE_FOLLOWED_LINK, MSG_ACCESS_TOKEN, \
-    TITLE_ACCESS_TOKEN, TWITCH_USER_FOLLOWS_LINK, TWITCH_GAME_INFO_LINK, BEARER
+    TITLE_ACCESS_TOKEN, TWITCH_USER_FOLLOWS_LINK, TWITCH_GAME_INFO_LINK, BEARER, OAUTH, FILE_OAUTH
 from sanitize import sanitize
 from stream import Stream
 
@@ -18,25 +18,25 @@ def authorize() -> str:
         value = easygui.enterbox(msg=MSG_ACCESS_TOKEN, title=TITLE_ACCESS_TOKEN, strip=True)
         if value is None:
             sys.exit(1)
-        with open("oauth.txt", "w") as f:
+        with open(FILE_OAUTH, "w") as f:
             f.write(value)
         if validateOAuth():
             return value
 
 def validateOAuth() -> bool:
-    with open("oauth.txt", "r") as f:
+    with open(FILE_OAUTH, "r") as f:
         currentOAuth = f.read().rstrip()
     if not currentOAuth:
         return False
     headers = {
-        "Authorization": "OAuth " + currentOAuth
+        "Authorization": OAUTH + currentOAuth
     }
     response = requests.get(TWITCH_VALIDATE_LINK, headers=headers)
     return "client_id" in response.text
 
 def getUserID(oAuth: str) -> str:
     headers = {
-        "Authorization": "OAuth " + oAuth
+        "Authorization": OAUTH + oAuth
     }
     response = requests.get(TWITCH_VALIDATE_LINK, headers=headers)
     return json.loads(response.text)["user_id"]
