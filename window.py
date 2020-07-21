@@ -1,7 +1,7 @@
 import io
 import sys
 import webbrowser
-from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, GROOVE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
+from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
 
@@ -9,7 +9,8 @@ from PIL import ImageTk, Image
 
 from aboutWindow import AboutWindow
 from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
-    MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW
+    MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
+    GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW
 from twitchapi import getLiveFollowedStreams
 
 class Window:
@@ -34,6 +35,7 @@ class Window:
         self.hideThumbnail = False
 
         self.labelImage = None
+        self.labelBoxArt = None
         self.liveListBox = None
         self.selectedListBox = None
         self.siteDropdown = None
@@ -57,11 +59,11 @@ class Window:
         self.window.deiconify()
 
     def addPreviewLabel(self):
-        labelPreview = Label(self.previewLabelFrame, text="Preview")
+        labelPreview = Label(self.previewLabelFrame, text=LABEL_PREVIEW)
         labelPreview.grid(sticky=NSEW)
 
     def addOkButton(self):
-        buttonOk = Button(self.okFrame, text="Take me to the streams!", width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
+        buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def initializeWindow(self):
@@ -83,8 +85,8 @@ class Window:
         fileMenu = Menu(menu, tearoff=0)
 
         issueMenu = Menu(menu, tearoff=0)
-        issueMenu.add_command(label="via Discord", command=lambda: webbrowser.open('https://discord.gg/nqWxgHm', new=2))
-        issueMenu.add_command(label="via Github", command=lambda: webbrowser.open('https://github.com/Go1den/StreamOpener/issues', new=2))
+        issueMenu.add_command(label="via Discord", command=lambda: webbrowser.open(DISCORD_LINK, new=2))
+        issueMenu.add_command(label="via Github", command=lambda: webbrowser.open(GITHUB_LINK, new=2))
 
         fileMenu.add_cascade(label="Report Issue", menu=issueMenu)
         fileMenu.add_command(label="Quit", command=lambda: self.closeWindow())
@@ -107,7 +109,7 @@ class Window:
 
     def toggleThumbnail(self):
         if self.hideThumbnail:
-            self.window.geometry('380x580') #I do not know why this works, but for some reason the window adds 20px to the 580 here
+            self.window.geometry('380x580')  # I do not know why this works, but for some reason the window adds 20px to the 580 here
             self.labelImage.grid()
             self.hideThumbnail = False
         else:
@@ -118,7 +120,7 @@ class Window:
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
         frameLiveListBox.grid(row=0, column=0, sticky=NSEW, padx=4, pady=(0, 4))
-        labelLiveListBox = Label(frameLiveListBox, text="Live Streams")
+        labelLiveListBox = Label(frameLiveListBox, text=LABEL_LIVE_STREAMS)
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameLiveListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -146,19 +148,19 @@ class Window:
     def addListBoxButtons(self):
         frameListBoxButtons = Frame(self.streamFrame)
         frameListBoxButtons.grid(row=0, column=1, sticky=NSEW, pady=(0, 4))
-        buttonLeftArrow = Button(frameListBoxButtons, text="<--", width=7, command=lambda: self.unselectStreams())
+        buttonLeftArrow = Button(frameListBoxButtons, text=LABEL_LEFT, width=7, command=lambda: self.unselectStreams())
         buttonLeftArrow.grid(row=0, sticky=NSEW, padx=4, pady=(38, 4))
-        buttonReset = Button(frameListBoxButtons, text="Reset", width=7, command=lambda: self.reset())
+        buttonReset = Button(frameListBoxButtons, text=LABEL_RESET, width=7, command=lambda: self.reset())
         buttonReset.grid(row=1, sticky=NSEW, padx=4, pady=4)
-        buttonRefresh = Button(frameListBoxButtons, text="Refresh", width=7, command=lambda: self.refresh())
+        buttonRefresh = Button(frameListBoxButtons, text=LABEL_REFRESH, width=7, command=lambda: self.refresh())
         buttonRefresh.grid(row=2, sticky=NSEW, padx=4, pady=4)
-        buttonRightArrow = Button(frameListBoxButtons, text="-->", width=7, command=lambda: self.selectStreams())
+        buttonRightArrow = Button(frameListBoxButtons, text=LABEL_RIGHT, width=7, command=lambda: self.selectStreams())
         buttonRightArrow.grid(row=3, sticky=NSEW, padx=4, pady=4)
 
     def addSelectedListbox(self):
         frameSelectedListBox = Frame(self.streamFrame)
         frameSelectedListBox.grid(row=0, column=2, sticky=NSEW, pady=(0, 4))
-        labelLiveListBox = Label(frameSelectedListBox, text="Selected Streams")
+        labelLiveListBox = Label(frameSelectedListBox, text=LABEL_SELECTED_STREAMS)
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameSelectedListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -175,7 +177,7 @@ class Window:
         labelTitle.grid(row=1, sticky=W, columnspan=2)
         boxArtFrame = Frame(self.previewFrame)
         boxArtFrame.grid(row=2, column=0, sticky=NSEW)
-        self.labelBoxArt = Label(boxArtFrame, image=self.boxArtImage, bd=1, width=52, height=72)
+        self.labelBoxArt = Label(boxArtFrame, image=self.boxArtImage, bd=1)
         self.labelBoxArt.grid(row=0, column=0, sticky=W)
         boxArtLabelFrame = Frame(self.previewFrame)
         boxArtLabelFrame.grid(row=2, column=1, sticky=NSEW)
@@ -220,6 +222,7 @@ class Window:
             unselectedStreamName = w.get(w.curselection())
             self.updatePreviewFrame(unselectedStreamName)
 
+    # Todo: combine these methods
     def selectStreams(self):
         if self.selectedStreams:
             for stream in self.selectedStreams:
@@ -230,6 +233,7 @@ class Window:
             self.selectedStreams = None
             self.resetPreview()
 
+    # Todo: combine these methods
     def unselectStreams(self):
         if self.unselectedStreams:
             for stream in self.unselectedStreams:
