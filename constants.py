@@ -18,6 +18,7 @@ RESPONSE_TYPE = "token"
 REDIRECT_URI = "http://www.go1den.com/streamopener-oauth/"
 
 ORDERED_STREAMING_SITES = OrderedDict()
+ORDERED_STREAMING_SITES['Twitch (Multiple tabs)'] = "https://twitch.tv/"
 ORDERED_STREAMING_SITES['Kadgar'] = "https://kadgar.net/live/"
 ORDERED_STREAMING_SITES['MultiStream'] = "https://multistre.am/"
 ORDERED_STREAMING_SITES['MultiTwitch'] = "https://multitwitch.tv/"
