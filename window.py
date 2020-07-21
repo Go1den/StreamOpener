@@ -31,6 +31,7 @@ class Window:
         self.multipleSelectMode = BooleanVar()
         self.singleSelectMode.set(True)
         self.multipleSelectMode.set(False)
+        self.hideThumbnail = False
 
         self.labelImage = None
         self.liveListBox = None
@@ -40,8 +41,7 @@ class Window:
         self.streamFrame = Frame(self.window)
         self.urlFrame = Frame(self.window)
         self.previewLabelFrame = Frame(self.window)
-        self.previewFrame = Frame(self.window, bd=2, relief=GROOVE, width=350, height=290)
-        self.previewFrame.grid_columnconfigure(1, weight=1)
+        self.previewFrame = Frame(self.window,  width=350, height=290)
         self.okFrame = Frame(self.window)
 
         self.initializeWindow()
@@ -71,6 +71,7 @@ class Window:
         self.window.resizable(width=False, height=False)
 
     def gridFrames(self):
+        self.previewFrame.grid_columnconfigure(1, weight=1)
         self.streamFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
         self.urlFrame.grid(row=1, sticky=NSEW, padx=8, pady=4)
         self.previewLabelFrame.grid(row=2, sticky=NSEW, padx=12)
@@ -90,16 +91,34 @@ class Window:
         fileMenu.add_command(label="Quit", command=lambda: self.closeWindow())
         menu.add_cascade(label="File", menu=fileMenu)
 
-        selectionMenu = Menu(menu, tearoff=0)
-        selectionMenu.add_checkbutton(label="Single", variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
-        selectionMenu.add_checkbutton(label="Multiple", variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
-        menu.add_cascade(label="Selection Mode", menu=selectionMenu)
+        selectModeMenu = Menu(menu, tearoff=0)
+        selectModeMenu.add_checkbutton(label="Single", variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
+        selectModeMenu.add_checkbutton(label="Multiple", variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
+
+        settingsMenu = Menu(menu, tearoff=0)
+        settingsMenu.add_cascade(label="Selection Mode", menu=selectModeMenu)
+        settingsMenu.add_command(label="Hide Thumbnail", command=lambda: self.toggleThumbnail())
+        menu.add_cascade(label="Settings Menu", menu=settingsMenu)
 
         helpMenu = Menu(menu, tearoff=0)
         helpMenu.add_command(label="About", command=lambda: AboutWindow(self.window))
         menu.add_cascade(label="Help", menu=helpMenu)
 
         self.window.config(menu=menu)
+
+    def toggleThumbnail(self):
+        if self.hideThumbnail:
+            self.labelImage.grid()
+            # self.previewFrame.grid()
+            # self.okFrame.grid()
+            # self.window.geometry('380x620')
+            self.hideThumbnail = False
+        else:
+            self.labelImage.grid_remove()
+            # self.previewFrame.grid()
+            # self.okFrame.grid()
+            # self.window.geometry('380x520')
+            self.hideThumbnail = True
 
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
