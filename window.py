@@ -41,7 +41,7 @@ class Window:
         self.streamFrame = Frame(self.window)
         self.urlFrame = Frame(self.window)
         self.previewLabelFrame = Frame(self.window)
-        self.previewFrame = Frame(self.window,  width=350, height=290)
+        self.previewFrame = Frame(self.window)
         self.okFrame = Frame(self.window)
 
         self.initializeWindow()
@@ -66,7 +66,7 @@ class Window:
 
     def initializeWindow(self):
         self.window.iconbitmap(STREAMOPENER_ICON)
-        self.window.geometry('380x620')
+        self.window.geometry('380x600')
         self.window.title(LABEL_STREAMOPENER)
         self.window.resizable(width=False, height=False)
 
@@ -76,7 +76,6 @@ class Window:
         self.urlFrame.grid(row=1, sticky=NSEW, padx=8, pady=4)
         self.previewLabelFrame.grid(row=2, sticky=NSEW, padx=12)
         self.previewFrame.grid(row=3, sticky=NSEW, padx=(12, 6), pady=(2, 4))
-        self.previewFrame.grid_propagate(False)
         self.okFrame.grid(row=4, sticky=NSEW, padx=(8, 4), pady=4)
 
     def addMenu(self):
@@ -108,16 +107,12 @@ class Window:
 
     def toggleThumbnail(self):
         if self.hideThumbnail:
+            self.window.geometry('380x580') #I do not know why this works, but for some reason the window adds 20px to the 580 here
             self.labelImage.grid()
-            # self.previewFrame.grid()
-            # self.okFrame.grid()
-            # self.window.geometry('380x620')
             self.hideThumbnail = False
         else:
             self.labelImage.grid_remove()
-            # self.previewFrame.grid()
-            # self.okFrame.grid()
-            # self.window.geometry('380x520')
+            self.window.geometry('380x400')
             self.hideThumbnail = True
 
     def addLiveListbox(self):
