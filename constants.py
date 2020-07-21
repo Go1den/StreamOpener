@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 BEARER = "Bearer "
 CLIENT_ID = "dzdcecm2nwr4j6ywb349cyvv81i9sv"
+OAUTH = "OAuth "
 
 DISCORD_LINK = "https://discord.gg/nqWxgHm"
 GITHUB_LINK = "https://github.com/Go1den/StreamOpener/issues"
@@ -45,7 +46,20 @@ LABEL_LEFT = "<--"
 LABEL_RIGHT = "-->"
 LABEL_OPEN_STREAMS = "Take me to the streams!"
 LABEL_PREVIEW = "Preview"
+LABEL_VIA_DISCORD = "via Discord"
+LABEL_VIA_GITHUB = "via Github"
+LABEL_REPORT_ISSUE = "Report Issue"
+LABEL_QUIT = "Quit"
+LABEL_FILE = "File"
+LABEL_SINGLE = "Single"
+LABEL_MULTIPLE = "Multiple"
+LABEL_SELECTION_MODE = "Selection Mode"
+LABEL_HIDE_THUMBNAIL = "Hide Thumbnail"
+LABEL_SETTINGS_MENU = "Settings"
+LABEL_ABOUT = "About"
+LABEL_HELP = "Help"
 
+FILE_OAUTH = "oauth.txt"
 FILE_PREVIEW_BOX_ART = "previewboxart.png"
 FILE_STREAM_PREVIEW = "streampreview.png"
-STREAMOPENER_ICON = 'streamopenericon.ico'
+FILE_STREAMOPENER_ICON = 'streamopenericon.ico'

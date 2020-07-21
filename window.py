@@ -8,9 +8,11 @@ from urllib.request import urlopen
 from PIL import ImageTk, Image
 
 from aboutWindow import AboutWindow
-from constants import STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
+from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
-    GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW
+    GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
+    LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
+    LABEL_HELP
 from twitchapi import getLiveFollowedStreams
 
 class Window:
@@ -67,7 +69,7 @@ class Window:
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def initializeWindow(self):
-        self.window.iconbitmap(STREAMOPENER_ICON)
+        self.window.iconbitmap(FILE_STREAMOPENER_ICON)
         self.window.geometry('380x600')
         self.window.title(LABEL_STREAMOPENER)
         self.window.resizable(width=False, height=False)
@@ -85,25 +87,25 @@ class Window:
         fileMenu = Menu(menu, tearoff=0)
 
         issueMenu = Menu(menu, tearoff=0)
-        issueMenu.add_command(label="via Discord", command=lambda: webbrowser.open(DISCORD_LINK, new=2))
-        issueMenu.add_command(label="via Github", command=lambda: webbrowser.open(GITHUB_LINK, new=2))
+        issueMenu.add_command(label=LABEL_VIA_DISCORD, command=lambda: webbrowser.open(DISCORD_LINK, new=2))
+        issueMenu.add_command(label=LABEL_VIA_GITHUB, command=lambda: webbrowser.open(GITHUB_LINK, new=2))
 
-        fileMenu.add_cascade(label="Report Issue", menu=issueMenu)
-        fileMenu.add_command(label="Quit", command=lambda: self.closeWindow())
-        menu.add_cascade(label="File", menu=fileMenu)
+        fileMenu.add_cascade(label=LABEL_REPORT_ISSUE, menu=issueMenu)
+        fileMenu.add_command(label=LABEL_QUIT, command=lambda: self.closeWindow())
+        menu.add_cascade(label=LABEL_FILE, menu=fileMenu)
 
         selectModeMenu = Menu(menu, tearoff=0)
-        selectModeMenu.add_checkbutton(label="Single", variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
-        selectModeMenu.add_checkbutton(label="Multiple", variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
+        selectModeMenu.add_checkbutton(label=LABEL_SINGLE, variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
+        selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_cascade(label="Selection Mode", menu=selectModeMenu)
-        settingsMenu.add_command(label="Hide Thumbnail", command=lambda: self.toggleThumbnail())
-        menu.add_cascade(label="Settings Menu", menu=settingsMenu)
+        settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
+        settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
+        menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
 
         helpMenu = Menu(menu, tearoff=0)
-        helpMenu.add_command(label="About", command=lambda: AboutWindow(self.window))
-        menu.add_cascade(label="Help", menu=helpMenu)
+        helpMenu.add_command(label=LABEL_ABOUT, command=lambda: AboutWindow(self.window))
+        menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
 
