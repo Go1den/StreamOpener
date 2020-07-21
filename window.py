@@ -318,20 +318,25 @@ class Window:
         self.resetPreview()
 
     def openURL(self):
-        watchingOnTwitch = False
-        if len(self.selectedListBox.get(0, END)) == 1 and messagebox.askyesno(LABEL_TWITCH, MSG_WATCH_ON_TWITCH):
+        finalURL = ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
+        watchingSingleStreamOnTwitch = False
+        if len(self.selectedListBox.get(0, END)) == 1 and finalURL != TWITCH_LINK and messagebox.askyesno(LABEL_TWITCH, MSG_WATCH_ON_TWITCH):
             finalURL = TWITCH_LINK
-            watchingOnTwitch = True
-        if not watchingOnTwitch and not self.siteDropdown.get():
+            watchingSingleStreamOnTwitch = True
+        if not watchingSingleStreamOnTwitch and not self.siteDropdown.get():
             messagebox.showerror(LABEL_ERROR, MSG_NO_SITE_SELECTED)
         elif len(self.selectedListBox.get(0, END)) > 0:
-            if not watchingOnTwitch:
-                finalURL = ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
-            for selectedStream in self.selectedListBox.get(0, END):
-                for stream in self.streams:
-                    if stream.stylizedStreamName == selectedStream:
-                        finalURL += stream.streamName + "/"
-            webbrowser.open(finalURL, new=2)
+            if finalURL == TWITCH_LINK:
+                for selectedStream in self.selectedListBox.get(0, END):
+                    for stream in self.streams:
+                        if stream.stylizedStreamName == selectedStream:
+                            webbrowser.open(finalURL + stream.streamName, new=2)
+            else:
+                for selectedStream in self.selectedListBox.get(0, END):
+                    for stream in self.streams:
+                        if stream.stylizedStreamName == selectedStream:
+                            finalURL += stream.streamName + "/"
+                webbrowser.open(finalURL, new=2)
         else:
             messagebox.showerror(LABEL_ERROR, MSG_NO_STREAMS_SELECTED)
 
