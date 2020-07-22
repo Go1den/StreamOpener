@@ -22,7 +22,8 @@ class MainWindow:
         self.window.withdraw()
         self.site = StringVar()
         self.oauth = oauth
-        self.streams = getLiveFollowedStreams(self.oauth)
+        # self.followedStreams = getAllStreamsUserFollows(self.oauth, getUserID(self.oauth))
+        self.liveStreams = getLiveFollowedStreams(self.oauth)
         self.selectedStreams = None
         self.unselectedStreams = None
         self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
@@ -195,7 +196,7 @@ class MainWindow:
         self.resetPreview()
 
     def populateLiveListBox(self):
-        for stream in self.streams:
+        for stream in self.liveStreams:
             self.liveListBox.insert(END, stream.stylizedStreamName)
 
     # TODO: condense these methods into one common method
@@ -278,7 +279,7 @@ class MainWindow:
         self.setDefaultPreviewLabels()
 
     def updatePreviewFrame(self, selectedStreamName):
-        thisStream = [stream for stream in self.streams if stream.stylizedStreamName == selectedStreamName][0]
+        thisStream = [stream for stream in self.liveStreams if stream.stylizedStreamName == selectedStreamName][0]
         if len(thisStream.streamTitle) > 50:
             self.previewTitle.set(thisStream.streamTitle[:50] + "...")
         else:
@@ -307,7 +308,7 @@ class MainWindow:
         tmpLiveList = refreshStreams
         tmpSelectedList = []
         for stylizedStreamName in self.selectedListBox.get(0, END):
-            stream = [stream for stream in self.streams if stream.stylizedStreamName == stylizedStreamName][0]
+            stream = [stream for stream in self.liveStreams if stream.stylizedStreamName == stylizedStreamName][0]
             if stream.isLive(refreshStreams):
                 tmpSelectedList.append(stream)
             else:
@@ -316,7 +317,7 @@ class MainWindow:
         tmpLiveList = [stream for stream in tmpLiveList if stream.stylizedStreamName not in [stream.stylizedStreamName for stream in tmpSelectedList]]
         for stream in tmpLiveList:
             self.liveListBox.insert(END, stream.stylizedStreamName)
-        self.streams = refreshStreams
+        self.liveStreams = refreshStreams
         self.resetPreview()
 
     def openURL(self):
@@ -330,12 +331,12 @@ class MainWindow:
         elif len(self.selectedListBox.get(0, END)) > 0:
             if finalURL == TWITCH_LINK:
                 for selectedStream in self.selectedListBox.get(0, END):
-                    for stream in self.streams:
+                    for stream in self.liveStreams:
                         if stream.stylizedStreamName == selectedStream:
                             webbrowser.open(finalURL + stream.streamName, new=2)
             else:
                 for selectedStream in self.selectedListBox.get(0, END):
-                    for stream in self.streams:
+                    for stream in self.liveStreams:
                         if stream.stylizedStreamName == selectedStream:
                             finalURL += stream.streamName + "/"
                 webbrowser.open(finalURL, new=2)
