@@ -12,10 +12,11 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
-    LABEL_HELP
+    LABEL_HELP, LABEL_TEAM_WINDOW
+from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams
 
-class Window:
+class MainWindow:
     def __init__(self, oauth=None):
         self.window = Tk()
         self.window.withdraw()
@@ -60,14 +61,6 @@ class Window:
         self.addOkButton()
         self.window.deiconify()
 
-    def addPreviewLabel(self):
-        labelPreview = Label(self.previewLabelFrame, text=LABEL_PREVIEW)
-        labelPreview.grid(sticky=NSEW)
-
-    def addOkButton(self):
-        buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
-        buttonOk.grid(sticky=NSEW, padx=4, pady=4)
-
     def initializeWindow(self):
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
         self.window.geometry('380x600')
@@ -99,6 +92,7 @@ class Window:
         selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
+        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self.window, {}))
         settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
         settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
@@ -108,16 +102,6 @@ class Window:
         menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
-
-    def toggleThumbnail(self):
-        if self.hideThumbnail:
-            self.window.geometry('380x580')  # I do not know why this works, but for some reason the window adds 20px to the 580 here
-            self.labelImage.grid()
-            self.hideThumbnail = False
-        else:
-            self.labelImage.grid_remove()
-            self.window.geometry('380x400')
-            self.hideThumbnail = True
 
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
@@ -131,21 +115,6 @@ class Window:
         self.populateLiveListBox()
         self.liveListBox.bind('<<ListboxSelect>>', self.onSelectLiveListbox)
         self.liveListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
-
-    def setSelectionModes(self, isMultipleMode, selectionMode):
-        if isMultipleMode:
-            self.singleSelectMode.set(False)
-        else:
-            self.multipleSelectMode.set(False)
-        self.liveListBox.configure(selectmode=selectionMode)
-        self.selectedListBox.configure(selectmode=selectionMode)
-        self.liveListBox.selection_clear(0, END)
-        self.selectedListBox.selection_clear(0, END)
-        self.resetPreview()
-
-    def populateLiveListBox(self):
-        for stream in self.streams:
-            self.liveListBox.insert(END, stream.stylizedStreamName)
 
     def addListBoxButtons(self):
         frameListBoxButtons = Frame(self.streamFrame)
@@ -171,6 +140,16 @@ class Window:
         self.selectedListBox.bind('<<ListboxSelect>>', self.onSelectSelectedListBox)
         self.selectedListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
+    def addDropdown(self):
+        labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
+        labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
+        self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(ORDERED_STREAMING_SITES.keys()))
+        self.siteDropdown.grid(row=1, column=1, sticky=NSEW, padx=4, pady=4)
+
+    def addPreviewLabel(self):
+        labelPreview = Label(self.previewLabelFrame, text=LABEL_PREVIEW)
+        labelPreview.grid(sticky=NSEW)
+
     def addPreview(self):
         self.setDefaultPreviewLabels()
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
@@ -189,6 +168,35 @@ class Window:
         labelGame.grid(row=1, sticky=W)
         labelViewers = Label(boxArtLabelFrame, textvariable=self.previewViewers)
         labelViewers.grid(row=2, sticky=W)
+
+    def addOkButton(self):
+        buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
+        buttonOk.grid(sticky=NSEW, padx=4, pady=4)
+
+    def toggleThumbnail(self):
+        if self.hideThumbnail:
+            self.window.geometry('380x580')  # I do not know why this works, but for some reason the window adds 20px to the 580 here
+            self.labelImage.grid()
+            self.hideThumbnail = False
+        else:
+            self.labelImage.grid_remove()
+            self.window.geometry('380x400')
+            self.hideThumbnail = True
+
+    def setSelectionModes(self, isMultipleMode, selectionMode):
+        if isMultipleMode:
+            self.singleSelectMode.set(False)
+        else:
+            self.multipleSelectMode.set(False)
+        self.liveListBox.configure(selectmode=selectionMode)
+        self.selectedListBox.configure(selectmode=selectionMode)
+        self.liveListBox.selection_clear(0, END)
+        self.selectedListBox.selection_clear(0, END)
+        self.resetPreview()
+
+    def populateLiveListBox(self):
+        for stream in self.streams:
+            self.liveListBox.insert(END, stream.stylizedStreamName)
 
     # TODO: condense these methods into one common method
     def onSelectLiveListbox(self, event):
@@ -268,12 +276,6 @@ class Window:
         self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
         self.labelBoxArt.configure(image=self.boxArtImage)
         self.setDefaultPreviewLabels()
-
-    def addDropdown(self):
-        labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
-        labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
-        self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(ORDERED_STREAMING_SITES.keys()))
-        self.siteDropdown.grid(row=1, column=1, sticky=NSEW, padx=4, pady=4)
 
     def updatePreviewFrame(self, selectedStreamName):
         thisStream = [stream for stream in self.streams if stream.stylizedStreamName == selectedStreamName][0]

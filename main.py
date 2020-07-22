@@ -1,5 +1,5 @@
+from mainwindow import MainWindow
 from twitchapi import authorize, validateOAuth
-from window import Window
 
 oAuth = None
 
@@ -9,5 +9,5 @@ else:
     with open("oauth.txt", "r") as f:
         oAuth = f.read().rstrip()
 
-w = Window(oAuth)
+w = MainWindow(oAuth)
 w.window.mainloop()
