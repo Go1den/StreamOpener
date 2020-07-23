@@ -41,11 +41,6 @@ def getUserID(oAuth: str) -> str:
     response = requests.get(TWITCH_VALIDATE_LINK, headers=headers)
     return json.loads(response.text)["user_id"]
 
-def getLiveFollowedStreams(oAuth: str) -> List[Stream]:
-    user_id = getUserID(oAuth)
-    usersFollowedStreams = getAllStreamsUserFollows(oAuth, user_id)
-    return getLiveStreamsUserFollows(oAuth, usersFollowedStreams)
-
 def getGameInformation(oAuth: str, games: List[str]) -> List:
     headers = {
         "Authorization": BEARER + oAuth,
@@ -57,7 +52,7 @@ def getGameInformation(oAuth: str, games: List[str]) -> List:
     response = requests.get(TWITCH_GAME_INFO_LINK, headers=headers, params=params)
     return json.loads(response.text)
 
-def getLiveStreamsUserFollows(oAuth: str, streams: List[List[str]]) -> List[Stream]:
+def getLiveFollowedStreams(oAuth: str, streams: List[List[Stream]]) -> List[Stream]:
     headers = {
         "Authorization": BEARER + oAuth,
         "Client-ID": CLIENT_ID,
@@ -65,7 +60,7 @@ def getLiveStreamsUserFollows(oAuth: str, streams: List[List[str]]) -> List[Stre
     liveStreams = []
     for streamBatch in streams:
         params = {
-            "user_id": streamBatch
+            "user_id": [stream['to_id'] for stream in streamBatch]
         }
         response = requests.get(TWITCH_LIVE_FOLLOWED_LINK, headers=headers, params=params)
         jsonStreams = json.loads(response.text)
@@ -92,7 +87,7 @@ def getLiveStreamsUserFollows(oAuth: str, streams: List[List[str]]) -> List[Stre
                 liveStreams.append(Stream(gameTitle, previewImage, streamName, streamTitle, stylizedStreamName, viewerCount, boxArtURL))
     return liveStreams
 
-def getAllStreamsUserFollows(oAuth, user_id) -> List[List[str]]:
+def getAllStreamsUserFollows(oAuth, user_id) -> List[Stream]:
     headers = {
         "Authorization": BEARER + oAuth,
         "Client-ID": CLIENT_ID,
@@ -107,9 +102,10 @@ def getAllStreamsUserFollows(oAuth, user_id) -> List[List[str]]:
         response = requests.get(TWITCH_USER_FOLLOWS_LINK, headers=headers, params=params)
         jsonStreams = json.loads(response.text)
         for stream in jsonStreams["data"]:
-            usersFollowedStreams.append(stream['to_id'])
+            usersFollowedStreams.append(stream)
         try:
             params["after"] = jsonStreams["pagination"]["cursor"]
         except KeyError:
             moreStreams = False
-    return [usersFollowedStreams[i:i + 100] for i in range(0, len(usersFollowedStreams), 100)]
+    print(usersFollowedStreams)
+    return usersFollowedStreams

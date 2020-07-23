@@ -14,16 +14,16 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
     LABEL_HELP, LABEL_TEAM_WINDOW
 from teamwindow import TeamWindow
-from twitchapi import getLiveFollowedStreams
+from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 
 class MainWindow:
-    def __init__(self, oauth=None):
+    def __init__(self, credentials):
         self.window = Tk()
         self.window.withdraw()
         self.site = StringVar()
-        self.oauth = oauth
-        # self.followedStreams = getAllStreamsUserFollows(self.oauth, getUserID(self.oauth))
-        self.liveStreams = getLiveFollowedStreams(self.oauth)
+        self.credentials = credentials
+        self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
+        self.liveStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         self.selectedStreams = None
         self.unselectedStreams = None
         self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
@@ -304,7 +304,8 @@ class MainWindow:
             return defaultImage
 
     def refresh(self):
-        refreshStreams = getLiveFollowedStreams(self.oauth)
+        self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
+        refreshStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         tmpLiveList = refreshStreams
         tmpSelectedList = []
         for stylizedStreamName in self.selectedListBox.get(0, END):
