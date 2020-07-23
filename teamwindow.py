@@ -4,10 +4,10 @@ from tkinter.ttk import Combobox
 from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS
 
 class TeamWindow:
-    def __init__(self, parentWindow, groups):
+    def __init__(self, parentWindow, teams):
         self.window = Toplevel(parentWindow)
         self.window.withdraw()
-        self.groups = groups
+        self.teams = teams
         self.teamFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
@@ -44,7 +44,8 @@ class TeamWindow:
     def addDropdown(self):
         labelTeam = Label(self.teamFrame, text="Team:")
         labelTeam.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        comboboxTeam = Combobox(self.teamFrame, values=[])
+        comboboxTeam = Combobox(self.teamFrame, values=list(self.teams.keys()), state="readonly")
+        comboboxTeam.current(0)
         comboboxTeam.grid(row=0, column=1, padx=4, pady=4)
         buttonNewTeam = Button(self.teamFrame, text="Create New Team", width=16)
         buttonNewTeam.grid(row=0, column=2, sticky=NSEW, padx=(40, 4), pady=4)

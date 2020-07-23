@@ -1,6 +1,8 @@
 import io
+import json
 import sys
 import webbrowser
+from collections import OrderedDict
 from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
@@ -12,7 +14,7 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
-    LABEL_HELP, LABEL_TEAM_WINDOW
+    LABEL_HELP, LABEL_TEAM_WINDOW, FILE_TEAMS, LABEL_TEAMS_DROPDOWN
 from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 
@@ -23,6 +25,8 @@ class MainWindow:
         self.site = StringVar()
         self.credentials = credentials
         self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
+        self.teams = self.getTeams()
+        self.currentTeam = StringVar()
         self.liveStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         self.selectedStreams = None
         self.unselectedStreams = None
@@ -44,6 +48,7 @@ class MainWindow:
         self.selectedListBox = None
         self.siteDropdown = None
 
+        self.teamsFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
         self.urlFrame = Frame(self.window)
         self.previewLabelFrame = Frame(self.window)
@@ -53,10 +58,11 @@ class MainWindow:
         self.initializeWindow()
         self.gridFrames()
         self.addMenu()
+        self.addTeamsDropdown()
         self.addLiveListbox()
         self.addListBoxButtons()
         self.addSelectedListbox()
-        self.addDropdown()
+        self.addURLDropdown()
         self.addPreviewLabel()
         self.addPreview()
         self.addOkButton()
@@ -64,17 +70,18 @@ class MainWindow:
 
     def initializeWindow(self):
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
-        self.window.geometry('380x600')
+        self.window.geometry('380x634')
         self.window.title(LABEL_STREAMOPENER)
         self.window.resizable(width=False, height=False)
 
     def gridFrames(self):
         self.previewFrame.grid_columnconfigure(1, weight=1)
-        self.streamFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
-        self.urlFrame.grid(row=1, sticky=NSEW, padx=8, pady=4)
-        self.previewLabelFrame.grid(row=2, sticky=NSEW, padx=12)
-        self.previewFrame.grid(row=3, sticky=NSEW, padx=(12, 6), pady=(2, 4))
-        self.okFrame.grid(row=4, sticky=NSEW, padx=(8, 4), pady=4)
+        self.teamsFrame.grid(row=0, sticky=NSEW, padx=8, pady=(4,0))
+        self.streamFrame.grid(row=1, sticky=NSEW, padx=4, pady=4)
+        self.urlFrame.grid(row=2, sticky=NSEW, padx=8, pady=4)
+        self.previewLabelFrame.grid(row=3, sticky=NSEW, padx=12)
+        self.previewFrame.grid(row=4, sticky=NSEW, padx=(12, 6), pady=(2, 4))
+        self.okFrame.grid(row=5, sticky=NSEW, padx=(8, 4), pady=4)
 
     def addMenu(self):
         menu = Menu(self.window)
@@ -88,7 +95,7 @@ class MainWindow:
         selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self.window, {}))
+        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self.window, self.teams))
         settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
         settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
@@ -103,6 +110,13 @@ class MainWindow:
         menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
+        
+    def addTeamsDropdown(self):
+        labelTeamsDropdown = Label(self.teamsFrame, text=LABEL_TEAMS_DROPDOWN)
+        labelTeamsDropdown.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
+        self.siteDropdown = Combobox(self.teamsFrame, textvariable=self.currentTeam, state="readonly", values=list(self.teams.keys()))
+        self.siteDropdown.current(0)
+        self.siteDropdown.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
@@ -141,7 +155,7 @@ class MainWindow:
         self.selectedListBox.bind('<<ListboxSelect>>', self.onSelectSelectedListBox)
         self.selectedListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
-    def addDropdown(self):
+    def addURLDropdown(self):
         labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
         self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(ORDERED_STREAMING_SITES.keys()))
@@ -176,12 +190,12 @@ class MainWindow:
 
     def toggleThumbnail(self):
         if self.hideThumbnail:
-            self.window.geometry('380x580')  # I do not know why this works, but for some reason the window adds 20px to the 580 here
+            self.window.geometry('380x614')  # I do not know why this works, but for some reason the window adds 20px to the 614 here
             self.labelImage.grid()
             self.hideThumbnail = False
         else:
             self.labelImage.grid_remove()
-            self.window.geometry('380x400')
+            self.window.geometry('380x434')
             self.hideThumbnail = True
 
     def setSelectionModes(self, isMultipleMode, selectionMode):
@@ -346,3 +360,14 @@ class MainWindow:
 
     def closeWindow(self):
         sys.exit(0)
+
+    def getTeams(self) -> OrderedDict:
+        with open(FILE_TEAMS, "r") as f:
+            teamsJson = f.read()
+        teams = json.loads(teamsJson)
+        allTeam = [stream["to_name"] for stream in self.followedStreams]
+        result = OrderedDict()
+        result["All"] = sorted(allTeam, key=str.casefold)
+        for team in sorted(teams['teams'], key=str.casefold):
+            result[team] = teams['teams'][team]
+        return result

@@ -64,8 +64,11 @@ LABEL_HELP = "Help"
 LABEL_TEAM_WINDOW = "Manage Teams"
 LABEL_FREE_AGENTS = "Free Agents"
 LABEL_TEAM_MEMBERS = "Team Members"
+LABEL_TEAMS_DROPDOWN = "Team:"
+LABEL_ALL_TEAM = "All"
 
 FILE_OAUTH = "oauth.txt"
 FILE_PREVIEW_BOX_ART = "previewboxart.png"
 FILE_STREAM_PREVIEW = "streampreview.png"
 FILE_STREAMOPENER_ICON = 'streamopenericon.ico'
+FILE_TEAMS = "teams.json"

@@ -87,7 +87,7 @@ def getLiveFollowedStreams(oAuth: str, streams: List[List[Stream]]) -> List[Stre
                 liveStreams.append(Stream(gameTitle, previewImage, streamName, streamTitle, stylizedStreamName, viewerCount, boxArtURL))
     return liveStreams
 
-def getAllStreamsUserFollows(oAuth, user_id) -> List[Stream]:
+def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
     headers = {
         "Authorization": BEARER + oAuth,
         "Client-ID": CLIENT_ID,
@@ -102,10 +102,9 @@ def getAllStreamsUserFollows(oAuth, user_id) -> List[Stream]:
         response = requests.get(TWITCH_USER_FOLLOWS_LINK, headers=headers, params=params)
         jsonStreams = json.loads(response.text)
         for stream in jsonStreams["data"]:
-            usersFollowedStreams.append(stream)
+            usersFollowedStreams.append(dict((x, stream[x]) for x in ("to_id", "to_name")))
         try:
             params["after"] = jsonStreams["pagination"]["cursor"]
         except KeyError:
             moreStreams = False
-    print(usersFollowedStreams)
     return usersFollowedStreams
