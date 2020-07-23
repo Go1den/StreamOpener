@@ -78,13 +78,8 @@ class MainWindow:
 
     def addMenu(self):
         menu = Menu(self.window)
+
         fileMenu = Menu(menu, tearoff=0)
-
-        issueMenu = Menu(menu, tearoff=0)
-        issueMenu.add_command(label=LABEL_VIA_DISCORD, command=lambda: webbrowser.open(DISCORD_LINK, new=2))
-        issueMenu.add_command(label=LABEL_VIA_GITHUB, command=lambda: webbrowser.open(GITHUB_LINK, new=2))
-
-        fileMenu.add_cascade(label=LABEL_REPORT_ISSUE, menu=issueMenu)
         fileMenu.add_command(label=LABEL_QUIT, command=lambda: self.closeWindow())
         menu.add_cascade(label=LABEL_FILE, menu=fileMenu)
 
@@ -98,7 +93,12 @@ class MainWindow:
         settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
 
+        issueMenu = Menu(menu, tearoff=0)
+        issueMenu.add_command(label=LABEL_VIA_DISCORD, command=lambda: webbrowser.open(DISCORD_LINK, new=2))
+        issueMenu.add_command(label=LABEL_VIA_GITHUB, command=lambda: webbrowser.open(GITHUB_LINK, new=2))
+
         helpMenu = Menu(menu, tearoff=0)
+        helpMenu.add_cascade(label=LABEL_REPORT_ISSUE, menu=issueMenu)
         helpMenu.add_command(label=LABEL_ABOUT, command=lambda: AboutWindow(self.window))
         menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
