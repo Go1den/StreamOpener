@@ -3,6 +3,7 @@ import json
 import sys
 import webbrowser
 from collections import OrderedDict
+from json.decoder import JSONDecodeError
 from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
@@ -76,7 +77,7 @@ class MainWindow:
 
     def gridFrames(self):
         self.previewFrame.grid_columnconfigure(1, weight=1)
-        self.teamsFrame.grid(row=0, sticky=NSEW, padx=8, pady=(4,0))
+        self.teamsFrame.grid(row=0, sticky=NSEW, padx=8, pady=(4, 0))
         self.streamFrame.grid(row=1, sticky=NSEW, padx=4, pady=4)
         self.urlFrame.grid(row=2, sticky=NSEW, padx=8, pady=4)
         self.previewLabelFrame.grid(row=3, sticky=NSEW, padx=12)
@@ -110,7 +111,7 @@ class MainWindow:
         menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
-        
+
     def addTeamsDropdown(self):
         labelTeamsDropdown = Label(self.teamsFrame, text=LABEL_TEAMS_DROPDOWN)
         labelTeamsDropdown.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
@@ -364,10 +365,14 @@ class MainWindow:
     def getTeams(self) -> OrderedDict:
         with open(FILE_TEAMS, "r") as f:
             teamsJson = f.read()
-        teams = json.loads(teamsJson)
+        try:
+            teams = json.loads(teamsJson)
+        except JSONDecodeError:
+            teams = None
         allTeam = [stream["to_name"] for stream in self.followedStreams]
         result = OrderedDict()
         result["All"] = sorted(allTeam, key=str.casefold)
-        for team in sorted(teams['teams'], key=str.casefold):
-            result[team] = teams['teams'][team]
+        if teams:
+            for team in sorted(teams['teams'], key=str.casefold):
+                result[team] = teams['teams'][team]
         return result
