@@ -52,7 +52,7 @@ def getGameInformation(oAuth: str, games: List[str]) -> List:
     response = requests.get(TWITCH_GAME_INFO_LINK, headers=headers, params=params)
     return json.loads(response.text)
 
-def getLiveFollowedStreams(oAuth: str, streams: List[List[Stream]]) -> List[Stream]:
+def getLiveFollowedStreams(oAuth: str, streams: List[List[dict]]) -> List[Stream]:
     headers = {
         "Authorization": BEARER + oAuth,
         "Client-ID": CLIENT_ID,
@@ -85,6 +85,7 @@ def getLiveFollowedStreams(oAuth: str, streams: List[List[Stream]]) -> List[Stre
                 streamName = sanitize(stream['thumbnail_url'][52:].split('-')[0])
                 stylizedStreamName = sanitize(stream['user_name'])
                 liveStreams.append(Stream(gameTitle, previewImage, streamName, streamTitle, stylizedStreamName, viewerCount, boxArtURL))
+    liveStreams.sort(key=lambda x: int(x.viewerCount), reverse=True)
     return liveStreams
 
 def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
