@@ -375,5 +375,7 @@ class MainWindow:
         result["All"] = sorted(allTeam, key=str.casefold)
         if teams:
             for team in sorted(teams['teams'], key=str.casefold):
+                print(team)
+                print(teams['teams'][team])
                 result[team] = teams['teams'][team]
         return result

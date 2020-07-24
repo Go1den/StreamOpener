@@ -169,6 +169,8 @@ class TeamWindow:
         self.currentTeam = self.comboboxTeam.get()
 
     def printTeamsWithoutAll(self):
+        print(self.teams)
+        print(self.parent.teams)
         print([self.teams[x] for x in self.teams if x != "All"])
         print([self.teams[x] for x in self.parent.teams if x != "All"])
 
@@ -232,4 +234,4 @@ class TeamWindow:
         self.comboboxTeam.configure(values=self.getListOfTeams())
 
     def isValidTeamName(self, name):
-        return name != "All" and name not in self.teams.keys() and name.isalnum()
+        return name != "All" and name not in self.teams.keys() and all(letter.isalpha() or letter.isspace() for letter in name)
