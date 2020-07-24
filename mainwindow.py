@@ -48,6 +48,7 @@ class MainWindow:
         self.liveListBox = None
         self.selectedListBox = None
         self.siteDropdown = None
+        self.teamDropdown = None
 
         self.teamsFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
@@ -96,7 +97,7 @@ class MainWindow:
         selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self.window, self.teams))
+        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
         settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
@@ -115,9 +116,9 @@ class MainWindow:
     def addTeamsDropdown(self):
         labelTeamsDropdown = Label(self.teamsFrame, text=LABEL_TEAMS_DROPDOWN)
         labelTeamsDropdown.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.siteDropdown = Combobox(self.teamsFrame, textvariable=self.currentTeam, state="readonly", values=list(self.teams.keys()))
-        self.siteDropdown.current(0)
-        self.siteDropdown.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+        self.teamDropdown = Combobox(self.teamsFrame, textvariable=self.currentTeam, state="readonly", values=list(self.teams.keys()))
+        self.teamDropdown.current(0)
+        self.teamDropdown.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
