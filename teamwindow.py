@@ -4,10 +4,11 @@ from tkinter.ttk import Combobox
 from typing import List
 
 from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS
+from teamNameWindow import TeamNameWindow
 
 class TeamWindow:
     def __init__(self, parent, teams):
-        # print(teams) //Todo does this team weirdness have to do with the OrderedDict being used by the parent window?
+        print(teams)
         self.window = Toplevel(parent.window)
         self.window.withdraw()
         self.parent = parent
@@ -16,8 +17,10 @@ class TeamWindow:
         self.streamFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
 
+        self.tempName = None
         self.currentTeam = None
         self.teamsExist = False
+        self.pageLoaded = False
 
         self.comboboxTeam = None
         self.freeAgentListbox = None
@@ -41,9 +44,8 @@ class TeamWindow:
         self.addButtons()
         if self.teamsExist:
             self.switchActiveTeam()
-        self.printTeamsWithoutAll()
+        self.pageLoaded = True
         self.window.deiconify()
-        self.window.mainloop()
 
     def initializeWindow(self):
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
@@ -72,7 +74,7 @@ class TeamWindow:
             self.comboboxTeam.current(0)
             self.currentTeam = self.comboboxTeam.get()
         self.comboboxTeam.grid(row=0, column=1, padx=4, pady=4)
-        buttonNewTeam = Button(self.teamFrame, text="Create New Team", width=16)
+        buttonNewTeam = Button(self.teamFrame, text="Create New Team", width=16, command=self.createNewTeam)
         buttonNewTeam.grid(row=0, column=2, sticky=NSEW, padx=(40, 4), pady=4)
 
     def addFreeAgentListbox(self):
@@ -118,7 +120,7 @@ class TeamWindow:
         buttonDelete.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
         buttonSave = Button(self.buttonFrame, text="OK", width=8, command=lambda: self.ok())
         buttonSave.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
-        buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=self.window.destroy)
+        buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
 
     def moveLeft(self):
@@ -158,7 +160,8 @@ class TeamWindow:
             self.buttonRightArrow.configure(state=DISABLED)
 
     def switchActiveTeam(self, event=None):
-        self.storeCurrentTeamChanges(self.currentTeam)
+        if self.pageLoaded:
+            self.storeCurrentTeamChanges(self.currentTeam)
         teamMembers = self.teams[self.comboboxTeam.get()]
         freeAgents = [x for x in self.teams["All"] if x not in teamMembers]
         self.clearListboxes()
@@ -222,9 +225,10 @@ class TeamWindow:
         self.teams[key] = list(self.teamMemberListbox.get(0, END))
 
     def ok(self):
-        if self.comboboxTeam.get() is not "":
+        if self.comboboxTeam.get() != "":
             self.storeCurrentTeamChanges(self.comboboxTeam.get())
-            self.parentWindow.teams = self.teams
+        self.parent.teams = self.teams
+        self.window.destroy()
 
     def delete(self):
         self.teams.pop(self.comboboxTeam.get())
@@ -235,3 +239,12 @@ class TeamWindow:
 
     def isValidTeamName(self, name):
         return name != "All" and name not in self.teams.keys() and all(letter.isalpha() or letter.isspace() for letter in name)
+
+    def createNewTeam(self):
+        print("let's do it")
+        teamNameWindow = TeamNameWindow(self)
+        # wait_window(teamNameWindow)
+        print("ok we did it fam")
+        print(self.tempName)
+        self.window.grab_set()
+

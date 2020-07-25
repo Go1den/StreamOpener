@@ -378,4 +378,5 @@ class MainWindow:
                 print(team)
                 print(teams['teams'][team])
                 result[team] = teams['teams'][team]
+        # print(result)
         return result
