@@ -1,5 +1,5 @@
+from copy import copy
 from tkinter import Frame, NSEW, Label, Scrollbar, Listbox, W, SINGLE, NONE, Button, Toplevel, END, MULTIPLE, DISABLED, NORMAL
-from tkinter.simpledialog import askstring
 from tkinter.ttk import Combobox
 from typing import List
 
@@ -8,15 +8,15 @@ from teamNameWindow import TeamNameWindow
 
 class TeamWindow:
     def __init__(self, parent, teams):
-        print(teams)
         self.window = Toplevel(parent.window)
         self.window.withdraw()
         self.parent = parent
-        self.teams = teams
+        self.teams = copy(teams)
         self.teamFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
 
+        self.isRename = False
         self.tempName = None
         self.currentTeam = None
         self.teamsExist = False
@@ -208,18 +208,8 @@ class TeamWindow:
 
     def rename(self):
         if self.comboboxTeam.current() >= 0:
-            newName = None
-            while not newName:
-                newName = askstring("Rename Team", "Please enter your new team name.")
-                if newName is None:
-                    return
-                if not self.isValidTeamName(newName):
-                    newName = None
-            self.teams[newName] = self.teams.pop(self.comboboxTeam.get())
-            self.comboboxTeam.current()
-            self.comboboxTeam.configure(values=self.getListOfTeams())
-            self.comboboxTeam.set(newName)
-            self.currentTeam = newName
+            self.isRename = True
+            TeamNameWindow(self)
 
     def storeCurrentTeamChanges(self, key):
         self.teams[key] = list(self.teamMemberListbox.get(0, END))
@@ -237,14 +227,6 @@ class TeamWindow:
         self.clearListboxes()
         self.comboboxTeam.configure(values=self.getListOfTeams())
 
-    def isValidTeamName(self, name):
-        return name != "All" and name not in self.teams.keys() and all(letter.isalpha() or letter.isspace() for letter in name)
-
     def createNewTeam(self):
-        print("let's do it")
-        teamNameWindow = TeamNameWindow(self)
-        # wait_window(teamNameWindow)
-        print("ok we did it fam")
-        print(self.tempName)
-        self.window.grab_set()
-
+        self.isRename = False
+        TeamNameWindow(self)

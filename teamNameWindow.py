@@ -1,6 +1,7 @@
 from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, messagebox
 
-from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_NAME, LABEL_TEAM_NAME_WINDOW, MSG_INVALID_TEAM_NAME, LABEL_ERROR
+from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_NAME, LABEL_TEAM_NAME_WINDOW, LABEL_ERROR, LABEL_ALL_TEAM, MSG_RESERVED_NAME, MSG_DUPLICATE_TEAM, \
+    MSG_ALNUM_ONLY, MSG_TEAM_NAME_LENGTH, MSG_ALL_SPACES
 
 class TeamNameWindow:
     def __init__(self, parent):
@@ -42,20 +43,48 @@ class TeamNameWindow:
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def ok(self):
+        self.teamName.set(self.teamName.get().strip())
         if self.isValidTeamName(self.teamName.get()):
-            self.parent.tempName = self.teamName.get()
-            print(self.parent.tempName)
+            if self.parent.isRename:
+                self.rename()
+            else:
+                self.createNewTeam()
             self.cancel()
         else:
-            messagebox.showerror(LABEL_ERROR, MSG_INVALID_TEAM_NAME)
+            self.window.grab_set()
 
     def cancel(self):
         self.parent.window.grab_set()
         self.window.destroy()
 
     def isValidTeamName(self, name):
-        return name != "All" and name not in self.parent.teams.keys() and all(letter.isalnum() or letter.isspace() for letter in name)
+        if name == LABEL_ALL_TEAM:
+            messagebox.showerror(LABEL_ERROR, MSG_RESERVED_NAME)
+            return False
+        elif name in self.parent.teams.keys():
+            messagebox.showerror(LABEL_ERROR, MSG_DUPLICATE_TEAM)
+            return False
+        elif not all(letter.isalnum() or letter.isspace() for letter in name):
+            messagebox.showerror(LABEL_ERROR, MSG_ALNUM_ONLY)
+            return False
+        elif len(name) < 1 or len(name) > 20:
+            messagebox.showerror(LABEL_ERROR, MSG_TEAM_NAME_LENGTH)
+            return False
+        elif name.isspace():
+            messagebox.showerror(LABEL_ERROR, MSG_ALL_SPACES)
+            return False
+        else:
+            return True
 
+    def rename(self):
+        self.parent.teams[self.teamName.get()] = self.parent.teams.pop(self.parent.comboboxTeam.get())
+        self.parent.comboboxTeam.current()
+        self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
+        self.parent.comboboxTeam.set(self.teamName.get())
+        self.parent.currentTeam = self.teamName.get()
 
-
-
+    def createNewTeam(self):
+        self.parent.teams[self.teamName.get()] = []
+        self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
+        self.parent.comboboxTeam.set(self.teamName.get())
+        self.parent.switchActiveTeam()
