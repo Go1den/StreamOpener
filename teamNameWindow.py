@@ -1,7 +1,7 @@
-from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, messagebox
+from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, messagebox, E
 
 from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_NAME, LABEL_TEAM_NAME_WINDOW, LABEL_ERROR, LABEL_ALL_TEAM, MSG_RESERVED_NAME, MSG_DUPLICATE_TEAM, \
-    MSG_ALNUM_ONLY, MSG_TEAM_NAME_LENGTH, MSG_ALL_SPACES
+    MSG_ALNUM_ONLY, MSG_TEAM_NAME_LENGTH, MSG_ALL_SPACES, LABEL_OK, LABEL_CANCEL
 
 class TeamNameWindow:
     def __init__(self, parent):
@@ -25,7 +25,7 @@ class TeamNameWindow:
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
-        self.window.geometry('380x200')
+        self.window.geometry('260x106+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
         self.window.title(LABEL_TEAM_NAME_WINDOW)
         self.window.resizable(width=False, height=False)
         self.window.transient(self.parent.window)
@@ -33,18 +33,19 @@ class TeamNameWindow:
 
     def gridFrames(self):
         self.entryFrame.grid(row=0, padx=4, pady=4, sticky=NSEW)
-        self.buttonFrame.grid(row=1, padx=4, pady=4, sticky=NSEW)
+        self.buttonFrame.grid(row=1, padx=4, pady=4, sticky=E)
 
     def addEntryFrame(self):
         labelTeamName = Label(self.entryFrame, text=LABEL_TEAM_NAME)
         labelTeamName.grid(row=0, sticky="NSW", padx=2, pady=4)
         entryTeamName = Entry(self.entryFrame, textvariable=self.teamName, width=40)
+        entryTeamName.focus()
         entryTeamName.grid(row=1, sticky=NSEW, padx=4, pady=4)
 
     def addButtonFrame(self):
-        buttonOk = Button(self.buttonFrame, text="OK", width=8, command=lambda: self.ok())
+        buttonOk = Button(self.buttonFrame, text=LABEL_OK, width=8, command=lambda: self.ok())
         buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=lambda: self.window.destroy())
+        buttonCancel = Button(self.buttonFrame, text=LABEL_CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def ok(self):
@@ -87,9 +88,11 @@ class TeamNameWindow:
         self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
         self.parent.comboboxTeam.set(self.teamName.get())
         self.parent.currentTeam = self.teamName.get()
+        print(self.parent.teams)
 
     def createNewTeam(self):
         self.parent.teams[self.teamName.get()] = []
         self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
         self.parent.comboboxTeam.set(self.teamName.get())
         self.parent.switchActiveTeam()
+        print(self.parent.teams)

@@ -3,8 +3,8 @@ from tkinter import Frame, NSEW, Label, Scrollbar, Listbox, W, SINGLE, NONE, But
 from tkinter.ttk import Combobox
 from typing import List
 
-from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS
-from fileHandler import writeTeams
+from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS, LABEL_TEAMS_DROPDOWN, \
+    LABEL_CREATE_NEW_TEAM, LABEL_RENAME, LABEL_DELETE, LABEL_OK, LABEL_CANCEL, LABEL_ALL_TEAM
 from teamNameWindow import TeamNameWindow
 
 class TeamWindow:
@@ -54,7 +54,7 @@ class TeamWindow:
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
-        self.window.geometry('380x282')
+        self.window.geometry('380x282+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
         self.window.title(LABEL_TEAM_WINDOW)
         self.window.resizable(width=False, height=False)
         self.window.transient(self.parent.window)
@@ -71,7 +71,7 @@ class TeamWindow:
 
     def addDropdown(self):
         teams = self.getListOfTeams()
-        labelTeam = Label(self.teamFrame, text="Team:")
+        labelTeam = Label(self.teamFrame, text=LABEL_TEAMS_DROPDOWN)
         labelTeam.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.comboboxTeam = Combobox(self.teamFrame, values=teams, state="readonly")
         self.comboboxTeam.bind("<<ComboboxSelected>>", self.switchActiveTeam)
@@ -80,7 +80,7 @@ class TeamWindow:
             self.comboboxTeam.current(0)
             self.currentTeam = self.comboboxTeam.get()
         self.comboboxTeam.grid(row=0, column=1, padx=4, pady=4)
-        buttonNewTeam = Button(self.teamFrame, text="Create New Team", width=16, command=self.createNewTeam)
+        buttonNewTeam = Button(self.teamFrame, text=LABEL_CREATE_NEW_TEAM, width=16, command=self.createNewTeam)
         buttonNewTeam.grid(row=0, column=2, sticky=NSEW, padx=(40, 4), pady=4)
 
     def addFreeAgentListbox(self):
@@ -120,13 +120,13 @@ class TeamWindow:
         self.teamMemberListbox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
     def addButtons(self):
-        self.buttonRename = Button(self.buttonFrame, text="Rename", width=8, command=lambda: self.rename())
+        self.buttonRename = Button(self.buttonFrame, text=LABEL_RENAME, width=8, command=lambda: self.rename())
         self.buttonRename.grid(row=0, column=0, sticky=NSEW, padx=(8, 4), pady=4)
-        buttonDelete = Button(self.buttonFrame, text="Delete", width=8, command=lambda: self.delete())
+        buttonDelete = Button(self.buttonFrame, text=LABEL_DELETE, width=8, command=lambda: self.delete())
         buttonDelete.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
-        buttonSave = Button(self.buttonFrame, text="OK", width=8, command=lambda: self.ok())
+        buttonSave = Button(self.buttonFrame, text=LABEL_OK, width=8, command=lambda: self.ok())
         buttonSave.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
-        buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=lambda: self.window.destroy())
+        buttonCancel = Button(self.buttonFrame, text=LABEL_CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
 
     def moveLeft(self):
@@ -166,10 +166,10 @@ class TeamWindow:
             self.buttonRightArrow.configure(state=DISABLED)
 
     def switchActiveTeam(self, event=None):
-        if self.pageLoaded:
+        if self.pageLoaded and self.currentTeam is not None and len(self.currentTeam) > 0:
             self.storeCurrentTeamChanges(self.currentTeam)
         teamMembers = self.teams[self.comboboxTeam.get()]
-        freeAgents = [x for x in self.teams["All"] if x not in teamMembers]
+        freeAgents = [x for x in self.teams[LABEL_ALL_TEAM] if x not in teamMembers]
         self.clearListboxes()
         for streamer in freeAgents:
             self.freeAgentListbox.insert(END, streamer)
@@ -204,7 +204,7 @@ class TeamWindow:
             self.buttonDownArrow.configure(state=NORMAL)
 
     def getListOfTeams(self) -> List[str]:
-        return list(key for key in self.teams.keys() if key != "All")
+        return list(key for key in self.teams.keys() if key != LABEL_ALL_TEAM)
 
     def rename(self):
         if self.comboboxTeam.current() >= 0:
@@ -217,9 +217,7 @@ class TeamWindow:
     def ok(self):
         if self.comboboxTeam.get() != "":
             self.storeCurrentTeamChanges(self.comboboxTeam.get())
-        self.parent.teams = self.teams
-        self.parent.updateTeamDropdown()
-        writeTeams(self.parent.teams)
+        self.parent.setTeams(self.teams)
         self.window.destroy()
 
     def delete(self):
@@ -228,6 +226,7 @@ class TeamWindow:
         self.comboboxTeam.selection_clear()
         self.clearListboxes()
         self.comboboxTeam.configure(values=self.getListOfTeams())
+        self.currentTeam = None
 
     def createNewTeam(self):
         self.isRename = False

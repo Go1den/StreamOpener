@@ -1,46 +1,55 @@
 import webbrowser
 from tkinter import Button, W, Toplevel, Label, LEFT, PhotoImage, Frame, SE
 
+from constants import FILE_STREAMOPENER_ICON, LABEL_ABOUT_WINDOW_INFO, LABEL_ABOUT_ME, LABEL_SUBSCRIBE_TWITCH, TWITCH_GO1DEN_SUBSCRIBE_LINK, LABEL_VISIT_MY_WEBSITE, \
+    TWITCH_MY_WEBSITE, LABEL_THANKS, LABEL_OK, LABEL_ABOUT, FILE_STREAMOPENER_ICON_64
+
 class AboutWindow:
     def __init__(self, parent):
-        self.aboutWindow = Toplevel(parent)
-        self.aboutWindow.withdraw()
-        self.aboutWindow.geometry('+{x}+80'.format(x=parent.winfo_x()))
-        self.aboutWindow.wm_attributes("-topmost", 1)
-        self.aboutWindow.focus_force()
-        self.aboutWindow.iconbitmap("streamopenericon.ico")
-        self.aboutWindow.title("About")
-        self.aboutWindow.resizable(False, False)
-        self.aboutWindow.grab_set()
+        self.window = Toplevel(parent.window)
+        self.window.withdraw()
+        self.parent = parent
 
-        self.frameTop = Frame(self.aboutWindow)
+        self.frameTop = Frame(self.window)
+        self.aboutImage = PhotoImage(file=FILE_STREAMOPENER_ICON_64)
 
-        self.aboutImage = PhotoImage(file="streamopenericon64.png")
-        self.aboutImageLabel = Label(self.frameTop, image=self.aboutImage)
-        self.aboutImageLabel.grid(row=0, column=0, padx=4, pady=4)
+        self.initializeWindow()
+        self.addAboutFrame()
+        self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()
 
-        self.aboutLabel = Label(self.frameTop, text="StreamOpener\n\nVersion 2.1\n\nReleased: 7/19/2020", justify=LEFT)
-        self.aboutLabel.grid(row=0, column=1, sticky=W, pady=4)
+    def initializeWindow(self):
+        self.parent.window.attributes('-disabled', 1)
+        self.window.iconbitmap(FILE_STREAMOPENER_ICON)
+        self.window.geometry('+{x}+{y}'.format(x=self.parent.window.winfo_x() + 60, y=self.parent.window.winfo_y() + 100))
+        self.window.title(LABEL_ABOUT)
+        self.window.resizable(False, False)
+        self.window.transient(self.parent.window)
+        self.window.grab_set()
+
+    def addAboutFrame(self):
+        aboutImageLabel = Label(self.frameTop, image=self.aboutImage)
+        aboutImageLabel.grid(row=0, column=0, padx=4, pady=4)
+
+        aboutLabel = Label(self.frameTop, text=LABEL_ABOUT_WINDOW_INFO, justify=LEFT)
+        aboutLabel.grid(row=0, column=1, sticky=W, pady=4)
 
         self.frameTop.grid(row=0, column=0, sticky=W)
 
-        self.aboutSupportLabel = Label(self.aboutWindow,
-                                       text="Hello. I'm Go1den. I developed StreamOpener.\nI do not plan to charge for this program ever.\nIf you would like to support me:",
-                                       justify=LEFT)
-        self.aboutSupportLabel.grid(row=1, column=0, sticky=W, padx=4, columnspan=2)
+        aboutSupportLabel = Label(self.window, text=LABEL_ABOUT_ME, justify=LEFT)
+        aboutSupportLabel.grid(row=1, column=0, sticky=W, padx=4, columnspan=2)
 
-        self.mySubscribeButton = Button(self.aboutWindow, text="Subscribe to my Twitch channel!", width=25,
-                                        command=lambda: webbrowser.open('https://www.twitch.tv/products/go1den', new=2))
-        self.mySubscribeButton.grid(row=2, column=0, columnspan=2, pady=4, padx=4)
+        mySubscribeButton = Button(self.window, text=LABEL_SUBSCRIBE_TWITCH, width=25,
+                                   command=lambda: webbrowser.open(TWITCH_GO1DEN_SUBSCRIBE_LINK, new=2))
+        mySubscribeButton.grid(row=2, column=0, columnspan=2, pady=4, padx=4)
 
-        self.myWebsiteButton = Button(self.aboutWindow, text="Visit my website!", width=25, command=lambda: webbrowser.open('https://www.go1den.com', new=2))
-        self.myWebsiteButton.grid(row=3, column=0, columnspan=2, pady=4, padx=4)
+        myWebsiteButton = Button(self.window, text=LABEL_VISIT_MY_WEBSITE, width=25, command=lambda: webbrowser.open(TWITCH_MY_WEBSITE, new=2))
+        myWebsiteButton.grid(row=3, column=0, columnspan=2, pady=4, padx=4)
 
-        self.aboutThanksLabel = Label(self.aboutWindow, text="Thank you so much for trying my program!\nIf you enjoy it, please tell others about it.", justify=LEFT)
-        self.aboutThanksLabel.grid(row=4, column=0, sticky=W, pady=4, padx=4)
+        aboutThanksLabel = Label(self.window, text=LABEL_THANKS, justify=LEFT)
+        aboutThanksLabel.grid(row=4, column=0, sticky=W, pady=4, padx=4)
 
-        self.okButton = Button(self.aboutWindow, text="OK", width=8, command=lambda: self.aboutWindow.destroy())
-        self.okButton.grid(row=5, column=0, sticky=SE, pady=4, padx=4)
-
-        self.aboutWindow.deiconify()
-        self.aboutWindow.mainloop()
+        okButton = Button(self.window, text=LABEL_OK, width=8, command=lambda: self.window.destroy())
+        okButton.grid(row=5, column=0, sticky=SE, pady=4, padx=4)

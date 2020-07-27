@@ -12,17 +12,30 @@ TWITCH_USER_FOLLOWS_LINK = "https://api.twitch.tv/helix/users/follows"
 TWITCH_LIVE_FOLLOWED_LINK = "https://api.twitch.tv/helix/streams"
 TWITCH_GAME_INFO_LINK = "https://api.twitch.tv/helix/games"
 TWITCH_LINK = "https://twitch.tv/"
+TWITCH_GO1DEN_SUBSCRIBE_LINK = 'https://www.twitch.tv/products/go1den'
+TWITCH_MY_WEBSITE = 'https://www.go1den.com'
 
 SCOPES = "user_read"
 RESPONSE_TYPE = "token"
 REDIRECT_URI = "http://www.go1den.com/streamopener-oauth/"
 
+LABEL_URL_TWITCH = "Twitch (Multiple tabs)"
+LABEL_URL_KADGAR = "Kadgar"
+LABEL_URL_MULTISTREAM = "MultiStream"
+LABEL_URL_MULTITWITCH = "MultiTwitch"
+LABEL_URL_TWITCHTHEATER = "TwitchTheater"
+
+URL_KADGAR = "https://kadgar.net/live/"
+URL_MULTISTREAM = "https://multistre.am/"
+URL_MULTITWITCH = "https://multitwitch.tv/"
+URL_TWITCHTHEATER = "https://twitchtheater.tv/"
+
 ORDERED_STREAMING_SITES = OrderedDict()
-ORDERED_STREAMING_SITES['Twitch (Multiple tabs)'] = "https://twitch.tv/"
-ORDERED_STREAMING_SITES['Kadgar'] = "https://kadgar.net/live/"
-ORDERED_STREAMING_SITES['MultiStream'] = "https://multistre.am/"
-ORDERED_STREAMING_SITES['MultiTwitch'] = "https://multitwitch.tv/"
-ORDERED_STREAMING_SITES['TwitchTheater'] = "https://twitchtheater.tv/"
+ORDERED_STREAMING_SITES[LABEL_URL_TWITCH] = TWITCH_LINK
+ORDERED_STREAMING_SITES[LABEL_URL_KADGAR] = URL_KADGAR
+ORDERED_STREAMING_SITES[LABEL_URL_MULTISTREAM] = URL_MULTISTREAM
+ORDERED_STREAMING_SITES[LABEL_URL_MULTITWITCH] = URL_MULTITWITCH
+ORDERED_STREAMING_SITES[LABEL_URL_TWITCHTHEATER] = URL_TWITCHTHEATER
 
 MSG_ACCESS_TOKEN = "Please enter the access_token from the URL you were redirected to."
 TITLE_ACCESS_TOKEN = "Enter Access Token"
@@ -37,6 +50,8 @@ MSG_ALNUM_ONLY = "Team name may only contain letters, numbers, and spaces."
 MSG_TEAM_NAME_LENGTH = "Team name must be between 1-20 characters."
 MSG_ALL_SPACES = "Team name cannot be all spaces."
 
+LABEL_CANCEL = "Cancel"
+LABEL_OK = "OK"
 LABEL_NO_TITLE = "Select a Live Stream to view details."
 LABEL_STREAM_DROPDOWN = "Open streams on:"
 LABEL_STREAMOPENER = "StreamOpener"
@@ -75,6 +90,16 @@ LABEL_TEAMS_DROPDOWN = "Team:"
 LABEL_ALL_TEAM = "All"
 LABEL_TEAM_NAME_WINDOW = "Team Name"
 LABEL_TEAM_NAME = "Enter a team name."
+LABEL_THANKS = "Thank you so much for trying my program!\nIf you enjoy it, please tell others about it."
+LABEL_CREATE_NEW_TEAM = "Create New Team"
+LABEL_RENAME = "Rename"
+LABEL_DELETE = "Delete"
+LABEL_SETTINGS_JSON = "settings"
+
+LABEL_ABOUT_WINDOW_INFO = "StreamOpener\n\nVersion 2.1\n\nReleased: 7/26/2020"
+LABEL_ABOUT_ME = "Hello. I'm Go1den. I developed StreamOpener.\nI do not plan to charge for this program ever.\nIf you would like to support me:"
+LABEL_SUBSCRIBE_TWITCH = "Subscribe to my Twitch channel!"
+LABEL_VISIT_MY_WEBSITE = "Visit my website!"
 
 FILE_OAUTH = "oauth.txt"
 FILE_PREVIEW_BOX_ART = "previewboxart.png"
@@ -82,6 +107,7 @@ FILE_STREAM_PREVIEW = "streampreview.png"
 FILE_STREAMOPENER_ICON = 'streamopenericon.ico'
 FILE_TEAMS = "teams.json"
 FILE_SETTINGS = "settings.json"
+FILE_STREAMOPENER_ICON_64 = "streamopenericon64.png"
 
 KEY_SELECTION_MODE = "selectionMode"
 KEY_HIDE_THUMBNAIL = "hideThumbnail"

@@ -12,8 +12,8 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
-    LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM
-from fileHandler import readTeams, readSettings, writeSettings
+    LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, LABEL_SETTINGS_JSON, LABEL_URL_TWITCH
+from fileHandler import readTeams, readSettings, writeSettings, writeTeams
 from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 
@@ -106,7 +106,7 @@ class MainWindow:
 
         helpMenu = Menu(menu, tearoff=0)
         helpMenu.add_cascade(label=LABEL_REPORT_ISSUE, menu=issueMenu)
-        helpMenu.add_command(label=LABEL_ABOUT, command=lambda: AboutWindow(self.window))
+        helpMenu.add_command(label=LABEL_ABOUT, command=lambda: AboutWindow(self))
         menu.add_cascade(label=LABEL_HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
@@ -191,22 +191,22 @@ class MainWindow:
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def applySettings(self):
-        if KEY_SELECTION_MODE in self.settings['settings']:
-            selectionMode = self.settings['settings'][KEY_SELECTION_MODE]
-            self.setSelectionModes(selectionMode == 'multiple', self.settings['settings'][KEY_SELECTION_MODE])
+        if KEY_SELECTION_MODE in self.settings[LABEL_SETTINGS_JSON]:
+            selectionMode = self.settings[LABEL_SETTINGS_JSON][KEY_SELECTION_MODE]
+            self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LABEL_SETTINGS_JSON][KEY_SELECTION_MODE])
         else:
             self.setSelectionModes(False, SINGLE)
-        if KEY_HIDE_THUMBNAIL in self.settings['settings']:
-            self.hideThumbnail.set(self.settings['settings'][KEY_HIDE_THUMBNAIL])
+        if KEY_HIDE_THUMBNAIL in self.settings[LABEL_SETTINGS_JSON]:
+            self.hideThumbnail.set(self.settings[LABEL_SETTINGS_JSON][KEY_HIDE_THUMBNAIL])
             self.toggleThumbnail(True)
         else:
             self.hideThumbnail.set(False)
-        if KEY_OPEN_STREAMS_ON in self.settings['settings']:
-            self.site.set(self.settings['settings'][KEY_OPEN_STREAMS_ON])
+        if KEY_OPEN_STREAMS_ON in self.settings[LABEL_SETTINGS_JSON]:
+            self.site.set(self.settings[LABEL_SETTINGS_JSON][KEY_OPEN_STREAMS_ON])
         else:
-            self.site.set(ORDERED_STREAMING_SITES['Twitch (Multiple tabs)'])
-        if KEY_TEAM in self.settings['settings']:
-            self.teamDropdown.set(self.settings['settings'][KEY_TEAM])
+            self.site.set(ORDERED_STREAMING_SITES[LABEL_URL_TWITCH])
+        if KEY_TEAM in self.settings[LABEL_SETTINGS_JSON] and self.settings[LABEL_SETTINGS_JSON][KEY_TEAM] in self.teams.keys():
+            self.teamDropdown.set(self.settings[LABEL_SETTINGS_JSON][KEY_TEAM])
             self.refresh()
 
     def toggleThumbnail(self, isProgramJustStarting):
@@ -222,7 +222,7 @@ class MainWindow:
             else:
                 self.window.geometry('380x434')
             self.hideThumbnail.set(True)
-        self.settings['settings'][KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
+        self.settings[LABEL_SETTINGS_JSON][KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
         writeSettings(self.settings)
 
     def setSelectionModes(self, isMultipleMode: bool, selectionMode: str):
@@ -232,7 +232,7 @@ class MainWindow:
         else:
             self.multipleSelectMode.set(False)
             self.singleSelectMode.set(True)
-        self.settings['settings'][KEY_SELECTION_MODE] = selectionMode
+        self.settings[LABEL_SETTINGS_JSON][KEY_SELECTION_MODE] = selectionMode
         writeSettings(self.settings)
         self.liveListBox.configure(selectmode=selectionMode)
         self.selectedListBox.configure(selectmode=selectionMode)
@@ -241,7 +241,7 @@ class MainWindow:
         self.resetPreview()
 
     def updateURLSetting(self, event=None):
-        self.settings['settings'][KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
+        self.settings[LABEL_SETTINGS_JSON][KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
         writeSettings(self.settings)
 
     def populateLiveListBox(self):
@@ -298,12 +298,18 @@ class MainWindow:
     def unselectStreams(self):
         if self.unselectedStreams:
             for stream in self.unselectedStreams:
-                self.liveListBox.insert(END, self.selectedListBox.get(stream))
+                if stream in self.teams[self.currentTeam.get()]:
+                    self.liveListBox.insert(END, self.selectedListBox.get(stream))
             for stream in reversed(self.unselectedStreams):
                 self.selectedListBox.delete(stream)
             self.selectedListBox.selection_clear(0, END)
             self.unselectedStreams = None
             self.resetPreview()
+
+    def setTeams(self, teams):
+        self.teams = teams
+        writeTeams(self.teams)
+        self.updateTeamDropdown()
 
     def updateTeamDropdown(self):
         self.teamDropdown.configure(values=list(self.teams.keys()))
@@ -377,7 +383,7 @@ class MainWindow:
             for stream in tmpLiveList:
                 self.liveListBox.insert(END, stream)
             self.liveStreams = refreshStreams
-            self.settings['settings'][KEY_TEAM] = self.teamDropdown.get()
+            self.settings[LABEL_SETTINGS_JSON][KEY_TEAM] = self.teamDropdown.get()
             writeSettings(self.settings)
             self.resetPreview()
 
