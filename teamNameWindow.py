@@ -18,12 +18,17 @@ class TeamNameWindow:
         self.addEntryFrame()
         self.addButtonFrame()
         self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()
 
     def initializeWindow(self):
+        self.parent.window.attributes('-disabled', 1)
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
         self.window.geometry('380x200')
         self.window.title(LABEL_TEAM_NAME_WINDOW)
         self.window.resizable(width=False, height=False)
+        self.window.transient(self.parent.window)
         self.window.grab_set()
 
     def gridFrames(self):
@@ -37,7 +42,7 @@ class TeamNameWindow:
         entryTeamName.grid(row=1, sticky=NSEW, padx=4, pady=4)
 
     def addButtonFrame(self):
-        buttonOk = Button(self.buttonFrame, text="Ok", width=8, command=lambda: self.ok())
+        buttonOk = Button(self.buttonFrame, text="OK", width=8, command=lambda: self.ok())
         buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)

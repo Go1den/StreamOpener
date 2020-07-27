@@ -4,6 +4,7 @@ from tkinter.ttk import Combobox
 from typing import List
 
 from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS
+from fileHandler import writeTeams
 from teamNameWindow import TeamNameWindow
 
 class TeamWindow:
@@ -46,12 +47,17 @@ class TeamWindow:
             self.switchActiveTeam()
         self.pageLoaded = True
         self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()
 
     def initializeWindow(self):
+        self.parent.window.attributes('-disabled', 1)
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
         self.window.geometry('380x282')
         self.window.title(LABEL_TEAM_WINDOW)
         self.window.resizable(width=False, height=False)
+        self.window.transient(self.parent.window)
         self.window.grab_set()
 
     def gridFrames(self):
@@ -171,12 +177,6 @@ class TeamWindow:
             self.teamMemberListbox.insert(END, streamer)
         self.currentTeam = self.comboboxTeam.get()
 
-    def printTeamsWithoutAll(self):
-        print(self.teams)
-        print(self.parent.teams)
-        print([self.teams[x] for x in self.teams if x != "All"])
-        print([self.teams[x] for x in self.parent.teams if x != "All"])
-
     def clearListboxes(self):
         self.freeAgentListbox.selection_clear(0, END)
         self.teamMemberListbox.selection_clear(0, END)
@@ -218,6 +218,8 @@ class TeamWindow:
         if self.comboboxTeam.get() != "":
             self.storeCurrentTeamChanges(self.comboboxTeam.get())
         self.parent.teams = self.teams
+        self.parent.updateTeamDropdown()
+        writeTeams(self.parent.teams)
         self.window.destroy()
 
     def delete(self):

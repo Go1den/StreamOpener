@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "team": "All",
+    "openStreamsOn": "Twitch (Multiple tabs)",
+    "selectionMode": "multiple",
+    "hideThumbnail": false
+  }
+}

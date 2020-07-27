@@ -1,9 +1,6 @@
 import io
-import json
 import sys
 import webbrowser
-from collections import OrderedDict
-from json.decoder import JSONDecodeError
 from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
@@ -15,7 +12,8 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
-    LABEL_HELP, LABEL_TEAM_WINDOW, FILE_TEAMS, LABEL_TEAMS_DROPDOWN
+    LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM
+from fileHandler import readTeams, readSettings, writeSettings
 from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 
@@ -25,8 +23,9 @@ class MainWindow:
         self.window.withdraw()
         self.site = StringVar()
         self.credentials = credentials
+        self.settings = readSettings()
         self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
-        self.teams = self.getTeams()
+        self.teams = readTeams(self.followedStreams)
         self.currentTeam = StringVar()
         self.liveStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         self.selectedStreams = None
@@ -39,9 +38,7 @@ class MainWindow:
         self.previewViewers = StringVar()
         self.singleSelectMode = BooleanVar()
         self.multipleSelectMode = BooleanVar()
-        self.singleSelectMode.set(True)
-        self.multipleSelectMode.set(False)
-        self.hideThumbnail = False
+        self.hideThumbnail = BooleanVar()
 
         self.labelImage = None
         self.labelBoxArt = None
@@ -68,6 +65,7 @@ class MainWindow:
         self.addPreviewLabel()
         self.addPreview()
         self.addOkButton()
+        self.applySettings()
         self.window.deiconify()
 
     def initializeWindow(self):
@@ -97,9 +95,9 @@ class MainWindow:
         selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_command(label=LABEL_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
+        settingsMenu.add_command(label=LABEL_SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
-        settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, command=lambda: self.toggleThumbnail())
+        settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail(False))
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)
@@ -118,6 +116,7 @@ class MainWindow:
         labelTeamsDropdown.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.teamDropdown = Combobox(self.teamsFrame, textvariable=self.currentTeam, state="readonly", values=list(self.teams.keys()))
         self.teamDropdown.current(0)
+        self.teamDropdown.bind("<<ComboboxSelected>>", self.refresh)
         self.teamDropdown.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def addLiveListbox(self):
@@ -161,6 +160,7 @@ class MainWindow:
         labelSiteDropdown = Label(self.urlFrame, text=LABEL_STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
         self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(ORDERED_STREAMING_SITES.keys()))
+        self.siteDropdown.bind("<<ComboboxSelected>>", self.updateURLSetting)
         self.siteDropdown.grid(row=1, column=1, sticky=NSEW, padx=4, pady=4)
 
     def addPreviewLabel(self):
@@ -190,30 +190,64 @@ class MainWindow:
         buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
-    def toggleThumbnail(self):
-        if self.hideThumbnail:
-            self.window.geometry('380x614')  # I do not know why this works, but for some reason the window adds 20px to the 614 here
-            self.labelImage.grid()
-            self.hideThumbnail = False
+    def applySettings(self):
+        if KEY_SELECTION_MODE in self.settings['settings']:
+            selectionMode = self.settings['settings'][KEY_SELECTION_MODE]
+            self.setSelectionModes(selectionMode == 'multiple', self.settings['settings'][KEY_SELECTION_MODE])
+        else:
+            self.setSelectionModes(False, SINGLE)
+        if KEY_HIDE_THUMBNAIL in self.settings['settings']:
+            self.hideThumbnail.set(self.settings['settings'][KEY_HIDE_THUMBNAIL])
+            self.toggleThumbnail(True)
+        else:
+            self.hideThumbnail.set(False)
+        if KEY_OPEN_STREAMS_ON in self.settings['settings']:
+            self.site.set(self.settings['settings'][KEY_OPEN_STREAMS_ON])
+        else:
+            self.site.set(ORDERED_STREAMING_SITES['Twitch (Multiple tabs)'])
+        if KEY_TEAM in self.settings['settings']:
+            self.teamDropdown.set(self.settings['settings'][KEY_TEAM])
+            self.refresh()
+
+    def toggleThumbnail(self, isProgramJustStarting):
+        if not self.hideThumbnail.get():
+            if not isProgramJustStarting:
+                self.window.geometry('380x614')  # I do not know why this works, but for some reason the window adds 20px to the 614 here
+                self.labelImage.grid()
+            self.hideThumbnail.set(False)
         else:
             self.labelImage.grid_remove()
-            self.window.geometry('380x434')
-            self.hideThumbnail = True
+            if isProgramJustStarting:
+                self.window.geometry('380x454')
+            else:
+                self.window.geometry('380x434')
+            self.hideThumbnail.set(True)
+        self.settings['settings'][KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
+        writeSettings(self.settings)
 
-    def setSelectionModes(self, isMultipleMode, selectionMode):
+    def setSelectionModes(self, isMultipleMode: bool, selectionMode: str):
         if isMultipleMode:
             self.singleSelectMode.set(False)
+            self.multipleSelectMode.set(True)
         else:
             self.multipleSelectMode.set(False)
+            self.singleSelectMode.set(True)
+        self.settings['settings'][KEY_SELECTION_MODE] = selectionMode
+        writeSettings(self.settings)
         self.liveListBox.configure(selectmode=selectionMode)
         self.selectedListBox.configure(selectmode=selectionMode)
         self.liveListBox.selection_clear(0, END)
         self.selectedListBox.selection_clear(0, END)
         self.resetPreview()
 
+    def updateURLSetting(self, event=None):
+        self.settings['settings'][KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
+        writeSettings(self.settings)
+
     def populateLiveListBox(self):
-        for stream in self.liveStreams:
-            self.liveListBox.insert(END, stream.stylizedStreamName)
+        tmpLiveList = [stream for stream in self.teams[self.currentTeam.get()] if stream in [x.stylizedStreamName for x in self.liveStreams]]
+        for stream in tmpLiveList:
+            self.liveListBox.insert(END, stream)
 
     # TODO: condense these methods into one common method
     def onSelectLiveListbox(self, event):
@@ -271,6 +305,11 @@ class MainWindow:
             self.unselectedStreams = None
             self.resetPreview()
 
+    def updateTeamDropdown(self):
+        self.teamDropdown.configure(values=list(self.teams.keys()))
+        self.teamDropdown.current(0)
+        self.refresh()
+
     def reset(self):
         self.liveListBox.selection_clear(0, END)
         self.liveListBox.delete(0, END)
@@ -319,23 +358,31 @@ class MainWindow:
         except ValueError:
             return defaultImage
 
-    def refresh(self):
-        self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
-        refreshStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
-        tmpLiveList = refreshStreams
-        tmpSelectedList = []
-        for stylizedStreamName in self.selectedListBox.get(0, END):
-            stream = [stream for stream in self.liveStreams if stream.stylizedStreamName == stylizedStreamName][0]
-            if stream.isLive(refreshStreams):
-                tmpSelectedList.append(stream)
-            else:
-                self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
-        self.liveListBox.delete(0, END)
-        tmpLiveList = [stream for stream in tmpLiveList if stream.stylizedStreamName not in [stream.stylizedStreamName for stream in tmpSelectedList]]
-        for stream in tmpLiveList:
-            self.liveListBox.insert(END, stream.stylizedStreamName)
-        self.liveStreams = refreshStreams
-        self.resetPreview()
+    def refresh(self, event=None):
+        if self.selectedListBox:  # Don't refresh if the window hasn't been fully created yet
+            self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
+            self.teams = readTeams(self.followedStreams)
+            refreshStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
+            tmpLiveList = refreshStreams
+            tmpSelectedList = []
+            for stylizedStreamName in self.selectedListBox.get(0, END):
+                stream = [stream for stream in self.liveStreams if stream.stylizedStreamName == stylizedStreamName][0]
+                if stream.isLive(refreshStreams):
+                    tmpSelectedList.append(stream.stylizedStreamName)
+                else:
+                    self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
+            self.liveListBox.delete(0, END)
+            tmpLiveList = [stream for stream in self.teams[self.currentTeam.get()] if
+                           self.isNotSelected(stream, tmpSelectedList) and stream in [x.stylizedStreamName for x in tmpLiveList]]
+            for stream in tmpLiveList:
+                self.liveListBox.insert(END, stream)
+            self.liveStreams = refreshStreams
+            self.settings['settings'][KEY_TEAM] = self.teamDropdown.get()
+            writeSettings(self.settings)
+            self.resetPreview()
+
+    def isNotSelected(self, stream, tmpSelectedList) -> bool:
+        return stream not in tmpSelectedList
 
     def openURL(self):
         finalURL = ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
@@ -362,20 +409,3 @@ class MainWindow:
 
     def closeWindow(self):
         sys.exit(0)
-
-    def getTeams(self) -> OrderedDict:
-        with open(FILE_TEAMS, "r") as f:
-            teamsJson = f.read()
-        try:
-            teams = json.loads(teamsJson)
-        except JSONDecodeError:
-            teams = None
-        allTeam = [stream["to_name"] for stream in self.followedStreams]
-        result = OrderedDict()
-        result["All"] = sorted(allTeam, key=str.casefold)
-        if teams:
-            for team in sorted(teams['teams'], key=str.casefold):
-                print(team)
-                print(teams['teams'][team])
-                result[team] = teams['teams'][team]
-        return result
