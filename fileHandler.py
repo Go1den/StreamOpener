@@ -3,7 +3,7 @@ from collections import OrderedDict
 from json import JSONDecodeError
 from typing import List
 
-from constants import FILE_TEAMS, LABEL_ALL_TEAM, FILE_SETTINGS
+from constants import FILE_TEAMS, LABEL_ALL_TEAM, FILE_SETTINGS, FILE_FILTERS
 
 def readTeams(followedStreams: List[dict]) -> OrderedDict:
     allTeam = [stream["to_name"] for stream in followedStreams]
@@ -45,3 +45,19 @@ def writeSettings(settings: dict):
     jsonSettings = json.dumps(settings, indent=2)
     with open(FILE_SETTINGS, "w") as f:
         f.write(jsonSettings)
+
+def readFilters() -> dict:
+    try:
+        with open(FILE_FILTERS, "r") as f:
+            filtersJson = f.read()
+        filters = json.loads(filtersJson)
+        return filters
+    except JSONDecodeError:
+        return {"filters": {}}
+    except FileNotFoundError:
+        return {"filters": {}}
+
+def writeFilters(settings: dict):
+    filtersJson = json.dumps(settings, indent=2)
+    with open(FILE_FILTERS, "w") as f:
+        f.write(filtersJson)

@@ -101,6 +101,11 @@ LABEL_ABOUT_ME = "Hello. I'm Go1den. I developed StreamOpener.\nI do not plan to
 LABEL_SUBSCRIBE_TWITCH = "Subscribe to my Twitch channel!"
 LABEL_VISIT_MY_WEBSITE = "Visit my website!"
 
+LABEL_FILTER = "Filter:"
+LABEL_FILTER_STREAMER = "This Streamer"
+LABEL_FILTER_GAME = "This Game"
+LABEL_FILTER_COMBO = "Streamer+Game"
+
 FILE_OAUTH = "oauth.txt"
 FILE_PREVIEW_BOX_ART = "previewboxart.png"
 FILE_STREAM_PREVIEW = "streampreview.png"
@@ -108,6 +113,7 @@ FILE_STREAMOPENER_ICON = 'streamopenericon.ico'
 FILE_TEAMS = "teams.json"
 FILE_SETTINGS = "settings.json"
 FILE_STREAMOPENER_ICON_64 = "streamopenericon64.png"
+FILE_FILTERS = "filters.json"
 
 KEY_SELECTION_MODE = "selectionMode"
 KEY_HIDE_THUMBNAIL = "hideThumbnail"

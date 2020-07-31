@@ -12,8 +12,9 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
-    LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, LABEL_SETTINGS_JSON, LABEL_URL_TWITCH
-from fileHandler import readTeams, readSettings, writeSettings, writeTeams
+    LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, LABEL_SETTINGS_JSON, LABEL_URL_TWITCH, \
+    LABEL_FILTER, LABEL_FILTER_STREAMER, LABEL_FILTER_GAME, LABEL_FILTER_COMBO
+from fileHandler import readTeams, readSettings, writeSettings, writeTeams, readFilters, writeFilters
 from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 
@@ -27,9 +28,12 @@ class MainWindow:
         self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
         self.teams = readTeams(self.followedStreams)
         self.currentTeam = StringVar()
+        self.filters = readFilters()
+        print(self.filters)
         self.liveStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         self.selectedStreams = None
         self.unselectedStreams = None
+        self.previewStreamObject = None
         self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
         self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
         self.previewTitle = StringVar()
@@ -52,6 +56,7 @@ class MainWindow:
         self.urlFrame = Frame(self.window)
         self.previewLabelFrame = Frame(self.window)
         self.previewFrame = Frame(self.window)
+        self.filterFrame = Frame(self.window)
         self.okFrame = Frame(self.window)
 
         self.initializeWindow()
@@ -64,13 +69,14 @@ class MainWindow:
         self.addURLDropdown()
         self.addPreviewLabel()
         self.addPreview()
+        self.addFilterFrame()
         self.addOkButton()
         self.applySettings()
         self.window.deiconify()
 
     def initializeWindow(self):
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
-        self.window.geometry('380x634')
+        self.window.geometry('380x674')
         self.window.title(LABEL_STREAMOPENER)
         self.window.resizable(width=False, height=False)
 
@@ -81,7 +87,8 @@ class MainWindow:
         self.urlFrame.grid(row=2, sticky=NSEW, padx=8, pady=4)
         self.previewLabelFrame.grid(row=3, sticky=NSEW, padx=12)
         self.previewFrame.grid(row=4, sticky=NSEW, padx=(12, 6), pady=(2, 4))
-        self.okFrame.grid(row=5, sticky=NSEW, padx=(8, 4), pady=4)
+        self.filterFrame.grid(row=5, sticky=NSEW, padx=(8, 4), pady=4)
+        self.okFrame.grid(row=6, sticky=NSEW, padx=(8, 4), pady=4)
 
     def addMenu(self):
         menu = Menu(self.window)
@@ -186,6 +193,16 @@ class MainWindow:
         labelViewers = Label(boxArtLabelFrame, textvariable=self.previewViewers)
         labelViewers.grid(row=2, sticky=W)
 
+    def addFilterFrame(self):
+        labelFilter = Label(self.filterFrame, text=LABEL_FILTER)
+        labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4,2), pady=4)
+        buttonFilterStreamer = Button(self.filterFrame, text=LABEL_FILTER_STREAMER, width=13, command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, None))
+        buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+        buttonFilterGame = Button(self.filterFrame, text=LABEL_FILTER_GAME, width=13, command=lambda: self.addFilter(None, self.previewStreamObject.gameTitle))
+        buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
+        buttonFilterCombo = Button(self.filterFrame, text=LABEL_FILTER_COMBO, width=13, command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, self.previewStreamObject.gameTitle))
+        buttonFilterCombo.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
+
     def addOkButton(self):
         buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
@@ -209,18 +226,30 @@ class MainWindow:
             self.teamDropdown.set(self.settings[LABEL_SETTINGS_JSON][KEY_TEAM])
             self.refresh()
 
+    def addFilter(self, name=None, game=None):
+        if name or game: #one must have a value or else filtering is pointless
+            newFilter = {}
+            if name:
+                newFilter["streamer"] = name
+            if game:
+                newFilter["game"] = game
+            if newFilter not in self.filters["filters"]:
+                self.filters["filters"].append(newFilter)
+            print(self.filters)
+            writeFilters(self.filters)
+
     def toggleThumbnail(self, isProgramJustStarting):
         if not self.hideThumbnail.get():
             if not isProgramJustStarting:
-                self.window.geometry('380x614')  # I do not know why this works, but for some reason the window adds 20px to the 614 here
+                self.window.geometry('380x654')  # I do not know why this works, but for some reason the window adds 20px to the 614 here
                 self.labelImage.grid()
             self.hideThumbnail.set(False)
         else:
             self.labelImage.grid_remove()
             if isProgramJustStarting:
-                self.window.geometry('380x454')
+                self.window.geometry('380x494')
             else:
-                self.window.geometry('380x434')
+                self.window.geometry('380x474')
             self.hideThumbnail.set(True)
         self.settings[LABEL_SETTINGS_JSON][KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
         writeSettings(self.settings)
@@ -333,6 +362,7 @@ class MainWindow:
         self.previewViewers.set(LABEL_VIEWERS)
 
     def resetPreview(self):
+        self.previewStreamObject = None
         self.previewImage = ImageTk.PhotoImage(Image.open(FILE_STREAM_PREVIEW))
         self.labelImage.configure(image=self.previewImage)
         self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
@@ -341,6 +371,7 @@ class MainWindow:
 
     def updatePreviewFrame(self, selectedStreamName):
         thisStream = [stream for stream in self.liveStreams if stream.stylizedStreamName == selectedStreamName][0]
+        self.previewStreamObject = thisStream
         if len(thisStream.streamTitle) > 50:
             self.previewTitle.set(thisStream.streamTitle[:50] + "...")
         else:
