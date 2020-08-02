@@ -17,10 +17,7 @@ class TeamNameWindow:
         self.gridFrames()
         self.addEntryFrame()
         self.addButtonFrame()
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
+        self.finalizeWindow()
 
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
@@ -47,6 +44,12 @@ class TeamNameWindow:
         buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         buttonCancel = Button(self.buttonFrame, text=LABEL_CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+
+    def finalizeWindow(self):
+        self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()
 
     def ok(self):
         self.teamName.set(self.teamName.get().strip())
@@ -88,11 +91,9 @@ class TeamNameWindow:
         self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
         self.parent.comboboxTeam.set(self.teamName.get())
         self.parent.currentTeam = self.teamName.get()
-        print(self.parent.teams)
 
     def createNewTeam(self):
         self.parent.teams[self.teamName.get()] = []
         self.parent.comboboxTeam.configure(values=self.parent.getListOfTeams())
         self.parent.comboboxTeam.set(self.teamName.get())
         self.parent.switchActiveTeam()
-        print(self.parent.teams)

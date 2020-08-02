@@ -1,3 +1,7 @@
 {
-  "filters": []
+  "filters": {
+    "streamer": [],
+    "combined": [],
+    "game": []
+  }
 }

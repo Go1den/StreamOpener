@@ -1,22 +1,24 @@
 import io
 import sys
 import webbrowser
-from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE
+from tkinter import StringVar, Tk, Frame, Label, NSEW, Listbox, MULTIPLE, END, Scrollbar, Menu, W, Button, NONE, messagebox, CENTER, RAISED, BooleanVar, SINGLE, DISABLED, NORMAL
 from tkinter.ttk import Combobox
 from urllib.request import urlopen
 
 from PIL import ImageTk, Image
 
-from aboutWindow import AboutWindow
 from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STREAM_DROPDOWN, LABEL_STREAMOPENER, LABEL_GAME, LABEL_STREAMER, LABEL_VIEWERS, TWITCH_LINK, \
     MSG_WATCH_ON_TWITCH, LABEL_TWITCH, LABEL_ERROR, MSG_NO_SITE_SELECTED, MSG_NO_STREAMS_SELECTED, LABEL_NO_TITLE, FILE_PREVIEW_BOX_ART, FILE_STREAM_PREVIEW, DISCORD_LINK, \
     GITHUB_LINK, LABEL_SELECTED_STREAMS, LABEL_RIGHT, LABEL_REFRESH, LABEL_RESET, LABEL_LEFT, LABEL_LIVE_STREAMS, LABEL_OPEN_STREAMS, LABEL_PREVIEW, LABEL_VIA_DISCORD, \
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
     LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, LABEL_SETTINGS_JSON, LABEL_URL_TWITCH, \
-    LABEL_FILTER, LABEL_FILTER_STREAMER, LABEL_FILTER_GAME, LABEL_FILTER_COMBO
+    LABEL_FILTER, LABEL_FILTER_STREAMER, LABEL_FILTER_GAME, LABEL_FILTER_COMBO, LABEL_SETTINGS_FILTER_WINDOW, MSG_FILTER_ADDED, LABEL_INFO, MSG_FILTER_ALREADY_EXISTS, LABEL_EDIT, \
+    LABEL_ENABLE_FILTERS, KEY_FILTERS, LABEL_FILTER_KEY_STREAMER, LABEL_FILTER_KEY_GAME, LABEL_FILTER_KEY_COMBINED
 from fileHandler import readTeams, readSettings, writeSettings, writeTeams, readFilters, writeFilters
-from teamwindow import TeamWindow
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
+from windows.aboutWindow import AboutWindow
+from windows.filterWindow import FilterWindow
+from windows.teamWindow import TeamWindow
 
 class MainWindow:
     def __init__(self, credentials):
@@ -29,7 +31,6 @@ class MainWindow:
         self.teams = readTeams(self.followedStreams)
         self.currentTeam = StringVar()
         self.filters = readFilters()
-        print(self.filters)
         self.liveStreams = getLiveFollowedStreams(self.credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
         self.selectedStreams = None
         self.unselectedStreams = None
@@ -43,6 +44,7 @@ class MainWindow:
         self.singleSelectMode = BooleanVar()
         self.multipleSelectMode = BooleanVar()
         self.hideThumbnail = BooleanVar()
+        self.enableFilters = BooleanVar()
 
         self.labelImage = None
         self.labelBoxArt = None
@@ -50,6 +52,10 @@ class MainWindow:
         self.selectedListBox = None
         self.siteDropdown = None
         self.teamDropdown = None
+
+        self.buttonFilterGame = None
+        self.buttonFilterStreamer = None
+        self.buttonFilterCombined = None
 
         self.teamsFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
@@ -97,14 +103,19 @@ class MainWindow:
         fileMenu.add_command(label=LABEL_QUIT, command=lambda: self.closeWindow())
         menu.add_cascade(label=LABEL_FILE, menu=fileMenu)
 
+        manageMenu = Menu(menu, tearoff=0)
+        manageMenu.add_command(label=LABEL_SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
+        manageMenu.add_command(label=LABEL_SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
+        menu.add_cascade(label=LABEL_EDIT, menu=manageMenu)
+
         selectModeMenu = Menu(menu, tearoff=0)
         selectModeMenu.add_checkbutton(label=LABEL_SINGLE, variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
         selectModeMenu.add_checkbutton(label=LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_command(label=LABEL_SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         settingsMenu.add_cascade(label=LABEL_SELECTION_MODE, menu=selectModeMenu)
         settingsMenu.add_checkbutton(label=LABEL_HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail(False))
+        settingsMenu.add_checkbutton(label=LABEL_ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
         menu.add_cascade(label=LABEL_SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)
@@ -195,19 +206,25 @@ class MainWindow:
 
     def addFilterFrame(self):
         labelFilter = Label(self.filterFrame, text=LABEL_FILTER)
-        labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4,2), pady=4)
-        buttonFilterStreamer = Button(self.filterFrame, text=LABEL_FILTER_STREAMER, width=13, command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, None))
-        buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
-        buttonFilterGame = Button(self.filterFrame, text=LABEL_FILTER_GAME, width=13, command=lambda: self.addFilter(None, self.previewStreamObject.gameTitle))
-        buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
-        buttonFilterCombo = Button(self.filterFrame, text=LABEL_FILTER_COMBO, width=13, command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, self.previewStreamObject.gameTitle))
-        buttonFilterCombo.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
+        labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4, 2), pady=4)
+        self.buttonFilterStreamer = Button(self.filterFrame, text=LABEL_FILTER_STREAMER, width=13,
+                                           command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, None))
+        self.buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+        self.buttonFilterGame = Button(self.filterFrame, text=LABEL_FILTER_GAME, width=13, command=lambda: self.addFilter(None, self.previewStreamObject.gameTitle))
+        self.buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
+        self.buttonFilterCombined = Button(self.filterFrame, text=LABEL_FILTER_COMBO, width=13,
+                                           command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, self.previewStreamObject.gameTitle))
+        self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
 
     def addOkButton(self):
         buttonOk = Button(self.okFrame, text=LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def applySettings(self):
+        refresh = False
+        if KEY_FILTERS in self.settings[LABEL_SETTINGS_JSON]:
+            self.enableFilters.set(self.settings[LABEL_SETTINGS_JSON][KEY_FILTERS])
+            refresh = True
         if KEY_SELECTION_MODE in self.settings[LABEL_SETTINGS_JSON]:
             selectionMode = self.settings[LABEL_SETTINGS_JSON][KEY_SELECTION_MODE]
             self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LABEL_SETTINGS_JSON][KEY_SELECTION_MODE])
@@ -224,19 +241,39 @@ class MainWindow:
             self.site.set(ORDERED_STREAMING_SITES[LABEL_URL_TWITCH])
         if KEY_TEAM in self.settings[LABEL_SETTINGS_JSON] and self.settings[LABEL_SETTINGS_JSON][KEY_TEAM] in self.teams.keys():
             self.teamDropdown.set(self.settings[LABEL_SETTINGS_JSON][KEY_TEAM])
+            refresh = True
+        if refresh:
             self.refresh()
 
     def addFilter(self, name=None, game=None):
-        if name or game: #one must have a value or else filtering is pointless
+        if name or game:  # one must have a value or else filtering is pointless
             newFilter = {}
             if name:
                 newFilter["streamer"] = name
             if game:
                 newFilter["game"] = game
-            if newFilter not in self.filters["filters"]:
-                self.filters["filters"].append(newFilter)
-            print(self.filters)
-            writeFilters(self.filters)
+            if "streamer" in newFilter.keys():
+                if "game" in newFilter.keys():
+                    newFilter["description"] = newFilter["streamer"] + " streaming " + newFilter["game"]
+                    filterCategory = "combined"
+                else:
+                    newFilter["description"] = newFilter["streamer"]
+                    filterCategory = "streamer"
+            else:
+                newFilter["description"] = newFilter["game"]
+                filterCategory = "game"
+            if newFilter not in self.filters["filters"][filterCategory]:
+                self.filters["filters"][filterCategory].append(newFilter)
+                writeFilters(self.filters)
+                messagebox.showinfo(LABEL_INFO, MSG_FILTER_ADDED.format(newFilter["description"]))
+            else:
+                messagebox.showerror(LABEL_ERROR, MSG_FILTER_ALREADY_EXISTS)
+
+    def setFilters(self, newFilters):
+        self.filters = newFilters
+        writeFilters(self.filters)
+        if self.enableFilters.get():
+            self.refresh()
 
     def toggleThumbnail(self, isProgramJustStarting):
         if not self.hideThumbnail.get():
@@ -274,7 +311,7 @@ class MainWindow:
         writeSettings(self.settings)
 
     def populateLiveListBox(self):
-        tmpLiveList = [stream for stream in self.teams[self.currentTeam.get()] if stream in [x.stylizedStreamName for x in self.liveStreams]]
+        tmpLiveList = [stream for stream in self.teams[self.currentTeam.get()] if stream in [x.stylizedStreamName for x in self.liveStreams if not self.isFiltered(x)]]
         for stream in tmpLiveList:
             self.liveListBox.insert(END, stream)
 
@@ -367,7 +404,13 @@ class MainWindow:
         self.labelImage.configure(image=self.previewImage)
         self.boxArtImage = ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART))
         self.labelBoxArt.configure(image=self.boxArtImage)
+        self.setFilterButtonsState(DISABLED)
         self.setDefaultPreviewLabels()
+
+    def setFilterButtonsState(self, state):
+        self.buttonFilterGame.configure(state=state)
+        self.buttonFilterStreamer.configure(state=state)
+        self.buttonFilterCombined.configure(state=state)
 
     def updatePreviewFrame(self, selectedStreamName):
         thisStream = [stream for stream in self.liveStreams if stream.stylizedStreamName == selectedStreamName][0]
@@ -386,6 +429,7 @@ class MainWindow:
         self.labelImage.configure(image=self.previewImage)
         self.boxArtImage = self.getImageFromURL(thisStream.boxArtURL, ImageTk.PhotoImage(Image.open(FILE_PREVIEW_BOX_ART)))
         self.labelBoxArt.configure(image=self.boxArtImage)
+        self.setFilterButtonsState(NORMAL)
 
     def getImageFromURL(self, url, defaultImage) -> ImageTk.PhotoImage:
         try:
@@ -409,6 +453,8 @@ class MainWindow:
                 else:
                     self.selectedListBox.delete(self.selectedListBox.get(0, END).index(stylizedStreamName))
             self.liveListBox.delete(0, END)
+            tmpLiveList = [stream for stream in tmpLiveList if not self.isFiltered(stream)]
+            # TODO: The below line might be able to combine with populateListbox
             tmpLiveList = [stream for stream in self.teams[self.currentTeam.get()] if
                            self.isNotSelected(stream, tmpSelectedList) and stream in [x.stylizedStreamName for x in tmpLiveList]]
             for stream in tmpLiveList:
@@ -420,6 +466,11 @@ class MainWindow:
 
     def isNotSelected(self, stream, tmpSelectedList) -> bool:
         return stream not in tmpSelectedList
+
+    def toggleFilters(self):
+        self.settings[LABEL_SETTINGS_JSON][KEY_FILTERS] = self.enableFilters.get()
+        writeSettings(self.settings)
+        self.refresh()
 
     def openURL(self):
         finalURL = ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
@@ -443,6 +494,14 @@ class MainWindow:
                 webbrowser.open(finalURL, new=2)
         else:
             messagebox.showerror(LABEL_ERROR, MSG_NO_STREAMS_SELECTED)
+
+    def isFiltered(self, stream):
+        if self.enableFilters.get():
+            isGameFiltered = stream.gameTitle in [x["description"] for x in self.filters["filters"][LABEL_FILTER_KEY_GAME]]
+            isStreamFiltered = stream.stylizedStreamName in [x["description"] for x in self.filters["filters"][LABEL_FILTER_KEY_STREAMER]]
+            isComboFiltered = stream.stylizedStreamName + " streaming " + stream.gameTitle in [x["description"] for x in self.filters["filters"][LABEL_FILTER_KEY_COMBINED]]
+            return isGameFiltered or isStreamFiltered or isComboFiltered
+        return False
 
     def closeWindow(self):
         sys.exit(0)

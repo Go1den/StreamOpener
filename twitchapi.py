@@ -109,3 +109,15 @@ def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
         except KeyError:
             moreStreams = False
     return usersFollowedStreams
+
+def isRecognizedTwitchGame(oAuth, game) -> bool:
+    headers = {
+        "Authorization": BEARER + oAuth,
+        "Client-ID": CLIENT_ID,
+    }
+    params = {
+        "name": game
+    }
+    response = requests.get(TWITCH_GAME_INFO_LINK, headers=headers, params=params)
+    jsonResponse = json.loads(response.text)
+    return jsonResponse["data"]
