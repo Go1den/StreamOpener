@@ -3,7 +3,7 @@ from collections import OrderedDict
 from json import JSONDecodeError
 from typing import List
 
-from constants import FILE_TEAMS, LABEL_ALL_TEAM, FILE_SETTINGS
+from constants import FILE_TEAMS, LABEL_ALL_TEAM, FILE_SETTINGS, FILE_FILTERS, KEY_OPEN_STREAMS_ON, LABEL_URL_TWITCH, KEY_HIDE_THUMBNAIL, KEY_SELECTION_MODE, KEY_TEAM, KEY_FILTERS
 
 def readTeams(followedStreams: List[dict]) -> OrderedDict:
     allTeam = [stream["to_name"] for stream in followedStreams]
@@ -35,13 +35,42 @@ def readSettings():
         with open(FILE_SETTINGS, "r") as f:
             settingsJson = f.read()
         settings = json.loads(settingsJson)
-        return settings
+        return populateMissingSettings(settings)
     except JSONDecodeError:
-        return {"settings": {}}
+        return populateMissingSettings({"settings": {}})
     except FileNotFoundError:
-        return {"settings": {}}
+        return populateMissingSettings({"settings": {}})
+
+def populateMissingSettings(settings) -> dict:
+    if KEY_OPEN_STREAMS_ON not in settings["settings"]:
+        settings["settings"][KEY_OPEN_STREAMS_ON] = LABEL_URL_TWITCH
+    if KEY_HIDE_THUMBNAIL not in settings["settings"]:
+        settings["settings"][KEY_HIDE_THUMBNAIL] = False
+    if KEY_SELECTION_MODE not in settings["settings"]:
+        settings["settings"][KEY_SELECTION_MODE] = "single"
+    if KEY_TEAM not in settings["settings"]:
+        settings["settings"][KEY_TEAM] = LABEL_ALL_TEAM
+    if KEY_FILTERS not in settings["settings"]:
+        settings["settings"][KEY_FILTERS] = False
+    return settings
 
 def writeSettings(settings: dict):
     jsonSettings = json.dumps(settings, indent=2)
     with open(FILE_SETTINGS, "w") as f:
         f.write(jsonSettings)
+
+def readFilters() -> dict:
+    try:
+        with open(FILE_FILTERS, "r") as f:
+            filtersJson = f.read()
+        filters = json.loads(filtersJson)
+        return filters
+    except JSONDecodeError:
+        return {"filters": {"streamer": [], "combined": [], "game": []}}
+    except FileNotFoundError:
+        return {"filters": {"streamer": [], "combined": [], "game": []}}
+
+def writeFilters(settings: dict):
+    filtersJson = json.dumps(settings, indent=2)
+    with open(FILE_FILTERS, "w") as f:
+        f.write(filtersJson)

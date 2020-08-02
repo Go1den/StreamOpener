@@ -1,6 +1,6 @@
 from credentials import Credentials
-from mainwindow import MainWindow
 from twitchapi import authorize, validateOAuth
+from windows.mainWindow import MainWindow
 
 oAuth = None
 

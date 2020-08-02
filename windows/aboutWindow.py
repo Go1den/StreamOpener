@@ -15,10 +15,7 @@ class AboutWindow:
 
         self.initializeWindow()
         self.addAboutFrame()
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
+        self.finalizeWindow()
 
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
@@ -53,3 +50,9 @@ class AboutWindow:
 
         okButton = Button(self.window, text=LABEL_OK, width=8, command=lambda: self.window.destroy())
         okButton.grid(row=5, column=0, sticky=SE, pady=4, padx=4)
+
+    def finalizeWindow(self):
+        self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()

@@ -1,18 +1,18 @@
-from copy import copy
+from copy import deepcopy
 from tkinter import Frame, NSEW, Label, Scrollbar, Listbox, W, SINGLE, NONE, Button, Toplevel, END, MULTIPLE, DISABLED, NORMAL
 from tkinter.ttk import Combobox
 from typing import List
 
 from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_WINDOW, LABEL_FREE_AGENTS, LABEL_LEFT, LABEL_UP, LABEL_DOWN, LABEL_RIGHT, LABEL_TEAM_MEMBERS, LABEL_TEAMS_DROPDOWN, \
     LABEL_CREATE_NEW_TEAM, LABEL_RENAME, LABEL_DELETE, LABEL_OK, LABEL_CANCEL, LABEL_ALL_TEAM
-from teamNameWindow import TeamNameWindow
+from windows.teamNameWindow import TeamNameWindow
 
 class TeamWindow:
     def __init__(self, parent, teams):
         self.window = Toplevel(parent.window)
         self.window.withdraw()
         self.parent = parent
-        self.teams = copy(teams)
+        self.teams = deepcopy(teams)
         self.teamFrame = Frame(self.window)
         self.streamFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
@@ -46,10 +46,7 @@ class TeamWindow:
         if self.teamsExist:
             self.switchActiveTeam()
         self.pageLoaded = True
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
+        self.finalizeWindow()
 
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
@@ -120,6 +117,7 @@ class TeamWindow:
         self.teamMemberListbox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
     def addButtons(self):
+        # TODO: These don't need to be defined as self.
         self.buttonRename = Button(self.buttonFrame, text=LABEL_RENAME, width=8, command=lambda: self.rename())
         self.buttonRename.grid(row=0, column=0, sticky=NSEW, padx=(8, 4), pady=4)
         buttonDelete = Button(self.buttonFrame, text=LABEL_DELETE, width=8, command=lambda: self.delete())
@@ -128,6 +126,12 @@ class TeamWindow:
         buttonSave.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
         buttonCancel = Button(self.buttonFrame, text=LABEL_CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
+
+    def finalizeWindow(self):
+        self.window.deiconify()
+        self.parent.window.wait_window(self.window)
+        self.parent.window.attributes('-disabled', 0)
+        self.parent.window.deiconify()
 
     def moveLeft(self):
         if self.selectedTeamMembers:
