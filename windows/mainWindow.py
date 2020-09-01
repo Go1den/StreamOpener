@@ -13,12 +13,13 @@ from constants import FILE_STREAMOPENER_ICON, ORDERED_STREAMING_SITES, LABEL_STR
     LABEL_VIA_GITHUB, LABEL_REPORT_ISSUE, LABEL_QUIT, LABEL_FILE, LABEL_SINGLE, LABEL_MULTIPLE, LABEL_SELECTION_MODE, LABEL_HIDE_THUMBNAIL, LABEL_SETTINGS_MENU, LABEL_ABOUT, \
     LABEL_HELP, LABEL_TEAMS_DROPDOWN, LABEL_SETTINGS_TEAM_WINDOW, KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, LABEL_SETTINGS_JSON, LABEL_URL_TWITCH, \
     LABEL_FILTER, LABEL_FILTER_STREAMER, LABEL_FILTER_GAME, LABEL_FILTER_COMBO, LABEL_SETTINGS_FILTER_WINDOW, MSG_FILTER_ADDED, LABEL_INFO, MSG_FILTER_ALREADY_EXISTS, LABEL_EDIT, \
-    LABEL_ENABLE_FILTERS, KEY_FILTERS, LABEL_FILTER_KEY_STREAMER, LABEL_FILTER_KEY_GAME, LABEL_FILTER_KEY_COMBINED
+    LABEL_ENABLE_FILTERS, KEY_FILTERS, LABEL_FILTER_KEY_STREAMER, LABEL_FILTER_KEY_GAME, LABEL_FILTER_KEY_COMBINED, LABEL_UNFOLLOW_WINDOW
 from fileHandler import readTeams, readSettings, writeSettings, writeTeams, readFilters, writeFilters
 from twitchapi import getLiveFollowedStreams, getAllStreamsUserFollows
 from windows.aboutWindow import AboutWindow
 from windows.filterWindow import FilterWindow
 from windows.teamWindow import TeamWindow
+from windows.unfollowWindow import UnfollowWindow
 
 class MainWindow:
     def __init__(self, credentials):
@@ -106,6 +107,7 @@ class MainWindow:
         manageMenu = Menu(menu, tearoff=0)
         manageMenu.add_command(label=LABEL_SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         manageMenu.add_command(label=LABEL_SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
+        manageMenu.add_command(label=LABEL_UNFOLLOW_WINDOW, command=lambda: UnfollowWindow(self))
         menu.add_cascade(label=LABEL_EDIT, menu=manageMenu)
 
         selectModeMenu = Menu(menu, tearoff=0)

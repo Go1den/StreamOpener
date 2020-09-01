@@ -102,6 +102,8 @@ LABEL_RENAME = "Rename"
 LABEL_DELETE = "Delete"
 LABEL_SETTINGS_JSON = "settings"
 
+LABEL_UNFOLLOW_WINDOW = "Unfollow Streams..."
+
 LABEL_ABOUT_WINDOW_INFO = "StreamOpener\n\nVersion 2.2\n\nReleased: 8/1/2020"
 LABEL_ABOUT_ME = "Hello. I'm Go1den. I developed StreamOpener.\nI do not plan to charge for this program ever.\nIf you would like to support me:"
 LABEL_SUBSCRIBE_TWITCH = "Subscribe to my Twitch channel!"
