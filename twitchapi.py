@@ -7,7 +7,7 @@ import easygui
 import requests
 
 from constants import TWITCH_OAUTH_LINK, CLIENT_ID, SCOPES, REDIRECT_URI, RESPONSE_TYPE, TWITCH_VALIDATE_LINK, TWITCH_LIVE_FOLLOWED_LINK, MSG_ACCESS_TOKEN, \
-    TITLE_ACCESS_TOKEN, TWITCH_USER_FOLLOWS_LINK, TWITCH_GAME_INFO_LINK, BEARER, OAUTH, FILE_OAUTH
+    TITLE_ACCESS_TOKEN, TWITCH_USER_FOLLOWS_LINK, TWITCH_GAME_INFO_LINK, BEARER, OAUTH, FILE_OAUTH, TWITCH_USER_UNFOLLOWS_LINK
 from sanitize import sanitize
 from stream import Stream
 
@@ -87,6 +87,21 @@ def getLiveFollowedStreams(oAuth: str, streams: List[List[dict]]) -> List[Stream
                 liveStreams.append(Stream(gameTitle, previewImage, streamName, streamTitle, stylizedStreamName, viewerCount, boxArtURL))
     liveStreams.sort(key=lambda x: int(x.viewerCount), reverse=True)
     return liveStreams
+
+def unfollowStreams(oAuth, user_id, streams: List[str]) -> bool:
+    headers = {
+        "Authorization": BEARER + oAuth,
+        "Client-ID": CLIENT_ID,
+    }
+    params = {
+        "from_id": user_id,
+        "to_id": streams
+    }
+    response = requests.delete(TWITCH_USER_UNFOLLOWS_LINK, headers=headers, params=params)
+    if response.status_code == 204:
+        return True
+    else:
+        return False
 
 def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
     headers = {
