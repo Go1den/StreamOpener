@@ -6,8 +6,10 @@ from typing import List
 import easygui
 import requests
 
-from constants import TWITCH_OAUTH_LINK, CLIENT_ID, SCOPES, REDIRECT_URI, RESPONSE_TYPE, TWITCH_VALIDATE_LINK, TWITCH_LIVE_FOLLOWED_LINK, MSG_ACCESS_TOKEN, \
-    TITLE_ACCESS_TOKEN, TWITCH_USER_FOLLOWS_LINK, TWITCH_GAME_INFO_LINK, BEARER, OAUTH, FILE_OAUTH
+from constants.fileConstants import FILE_OAUTH
+from constants.linkConstants import TWITCH_VALIDATE_LINK, TWITCH_OAUTH_LINK, TWITCH_USER_FOLLOWS_LINK, TWITCH_LIVE_FOLLOWED_LINK, TWITCH_GAME_INFO_LINK, REDIRECT_URI
+from constants.messageConstants import MSG_ACCESS_TOKEN
+from constants.miscConstants import BEARER, CLIENT_ID, OAUTH, SCOPES, RESPONSE_TYPE, TITLE_ACCESS_TOKEN
 from sanitize import sanitize
 from stream import Stream
 

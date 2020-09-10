@@ -3,7 +3,9 @@ from collections import OrderedDict
 from json import JSONDecodeError
 from typing import List
 
-from constants import FILE_TEAMS, LABEL_ALL_TEAM, FILE_SETTINGS, FILE_FILTERS, KEY_OPEN_STREAMS_ON, LABEL_URL_TWITCH, KEY_HIDE_THUMBNAIL, KEY_SELECTION_MODE, KEY_TEAM, KEY_FILTERS
+from constants.miscConstants import KEY_SELECTION_MODE, KEY_HIDE_THUMBNAIL, KEY_OPEN_STREAMS_ON, KEY_TEAM, KEY_FILTERS
+from constants.fileConstants import FILE_TEAMS, FILE_SETTINGS, FILE_FILTERS
+from constants.labelConstants import LABEL_URL_TWITCH, LABEL_ALL_TEAM
 
 def readTeams(followedStreams: List[dict]) -> OrderedDict:
     allTeam = [stream["to_name"] for stream in followedStreams]

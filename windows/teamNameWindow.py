@@ -1,7 +1,8 @@
 from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, messagebox, E
 
-from constants import FILE_STREAMOPENER_ICON, LABEL_TEAM_NAME, LABEL_TEAM_NAME_WINDOW, LABEL_ERROR, LABEL_ALL_TEAM, MSG_RESERVED_NAME, MSG_DUPLICATE_TEAM, \
-    MSG_ALNUM_ONLY, MSG_TEAM_NAME_LENGTH, MSG_ALL_SPACES, LABEL_OK, LABEL_CANCEL
+from constants.fileConstants import FILE_STREAMOPENER_ICON
+from constants.messageConstants import MSG_RESERVED_NAME, MSG_DUPLICATE_TEAM, MSG_ALNUM_ONLY, MSG_TEAM_NAME_LENGTH, MSG_ALL_SPACES
+from constants.labelConstants import LABEL_CANCEL, LABEL_OK, LABEL_ERROR, LABEL_ALL_TEAM, LABEL_TEAM_NAME_WINDOW, LABEL_TEAM_NAME
 
 class TeamNameWindow:
     def __init__(self, parent):
