@@ -24,7 +24,7 @@ class UnfollowWindow:
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
         self.window.iconbitmap(FILE_STREAMOPENER_ICON)
-        self.window.geometry('220x564+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
+        self.window.geometry('218x400+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
         self.window.title(LABEL_UNFOLLOW_WINDOW)
         self.window.resizable(width=False, height=False)
         self.window.transient(self.parent.window)
@@ -39,7 +39,7 @@ class UnfollowWindow:
         labelUnfollowListbox.grid(row=0, column=0, sticky=W, padx=4, pady=4)
         scrollbarGame = Scrollbar(self.listboxFrame)
         scrollbarGame.grid(row=1, column=1, sticky="NWS")
-        self.unfollowListbox = Listbox(self.listboxFrame, selectmode=MULTIPLE, yscrollcommand=scrollbarGame.set, activestyle=NONE, width=30, height=30)
+        self.unfollowListbox = Listbox(self.listboxFrame, selectmode=MULTIPLE, yscrollcommand=scrollbarGame.set, activestyle=NONE, width=30, height=20)
         scrollbarGame.config(command=self.unfollowListbox.yview)
         self.unfollowListbox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
         self.unfollowListbox.configure(exportselection=False)
