@@ -22,9 +22,9 @@ class TeamNameWindow:
 
     def initializeWindow(self):
         self.parent.window.attributes('-disabled', 1)
-        self.window.iconbitmap(FileConstants.FILE_STREAMOPENER_ICON)
+        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
         self.window.geometry('260x106+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
-        self.window.title(LabelConstants.LABEL_TEAM_NAME_WINDOW)
+        self.window.title(LabelConstants.TEAM_NAME_WINDOW)
         self.window.resizable(width=False, height=False)
         self.window.transient(self.parent.window)
         self.window.grab_set()
@@ -34,16 +34,16 @@ class TeamNameWindow:
         self.buttonFrame.grid(row=1, padx=4, pady=4, sticky=E)
 
     def addEntryFrame(self):
-        labelTeamName = Label(self.entryFrame, text=LabelConstants.LABEL_TEAM_NAME)
+        labelTeamName = Label(self.entryFrame, text=LabelConstants.TEAM_NAME)
         labelTeamName.grid(row=0, sticky="NSW", padx=2, pady=4)
         entryTeamName = Entry(self.entryFrame, textvariable=self.teamName, width=40)
         entryTeamName.focus()
         entryTeamName.grid(row=1, sticky=NSEW, padx=4, pady=4)
 
     def addButtonFrame(self):
-        buttonOk = Button(self.buttonFrame, text=LabelConstants.LABEL_OK, width=8, command=lambda: self.ok())
+        buttonOk = Button(self.buttonFrame, text=LabelConstants.OK, width=8, command=lambda: self.ok())
         buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        buttonCancel = Button(self.buttonFrame, text=LabelConstants.LABEL_CANCEL, width=8, command=lambda: self.window.destroy())
+        buttonCancel = Button(self.buttonFrame, text=LabelConstants.CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def finalizeWindow(self):
@@ -68,20 +68,20 @@ class TeamNameWindow:
         self.window.destroy()
 
     def isValidTeamName(self, name):
-        if name == LabelConstants.LABEL_ALL_TEAM:
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_RESERVED_NAME)
+        if name == LabelConstants.ALL_TEAM:
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.RESERVED_NAME)
             return False
         elif name in self.parent.teams.keys():
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_DUPLICATE_TEAM)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.DUPLICATE_TEAM)
             return False
         elif not all(letter.isalnum() or letter.isspace() for letter in name):
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_ALNUM_ONLY)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.ALNUM_ONLY)
             return False
         elif len(name) < 1 or len(name) > 20:
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_TEAM_NAME_LENGTH)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.TEAM_NAME_LENGTH)
             return False
         elif name.isspace():
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_ALL_SPACES)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.ALL_SPACES)
             return False
         else:
             return True

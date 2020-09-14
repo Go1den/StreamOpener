@@ -33,8 +33,8 @@ class MainWindow:
         self.selectedStreams = None
         self.unselectedStreams = None
         self.previewStreamObject = None
-        self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.FILE_STREAM_PREVIEW))
-        self.boxArtImage = ImageTk.PhotoImage(Image.open(FileConstants.FILE_PREVIEW_BOX_ART))
+        self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
+        self.boxArtImage = ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART))
         self.previewTitle = StringVar()
         self.previewName = StringVar()
         self.previewGame = StringVar()
@@ -79,9 +79,9 @@ class MainWindow:
         self.window.deiconify()
 
     def initializeWindow(self):
-        self.window.iconbitmap(FileConstants.FILE_STREAMOPENER_ICON)
+        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
         self.window.geometry('380x674')
-        self.window.title(LabelConstants.LABEL_STREAMOPENER)
+        self.window.title(LabelConstants.STREAMOPENER)
         self.window.resizable(width=False, height=False)
 
     def gridFrames(self):
@@ -98,37 +98,37 @@ class MainWindow:
         menu = Menu(self.window)
 
         fileMenu = Menu(menu, tearoff=0)
-        fileMenu.add_command(label=LabelConstants.LABEL_QUIT, command=lambda: self.closeWindow())
-        menu.add_cascade(label=LabelConstants.LABEL_FILE, menu=fileMenu)
+        fileMenu.add_command(label=LabelConstants.QUIT, command=lambda: self.closeWindow())
+        menu.add_cascade(label=LabelConstants.FILE, menu=fileMenu)
 
         manageMenu = Menu(menu, tearoff=0)
-        manageMenu.add_command(label=LabelConstants.LABEL_SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
-        manageMenu.add_command(label=LabelConstants.LABEL_SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
-        menu.add_cascade(label=LabelConstants.LABEL_EDIT, menu=manageMenu)
+        manageMenu.add_command(label=LabelConstants.SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
+        manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
+        menu.add_cascade(label=LabelConstants.EDIT, menu=manageMenu)
 
         selectModeMenu = Menu(menu, tearoff=0)
-        selectModeMenu.add_checkbutton(label=LabelConstants.LABEL_SINGLE, variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
-        selectModeMenu.add_checkbutton(label=LabelConstants.LABEL_MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
+        selectModeMenu.add_checkbutton(label=LabelConstants.SINGLE, variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
+        selectModeMenu.add_checkbutton(label=LabelConstants.MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
 
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_cascade(label=LabelConstants.LABEL_SELECTION_MODE, menu=selectModeMenu)
-        settingsMenu.add_checkbutton(label=LabelConstants.LABEL_HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail(False))
-        settingsMenu.add_checkbutton(label=LabelConstants.LABEL_ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
-        menu.add_cascade(label=LabelConstants.LABEL_SETTINGS_MENU, menu=settingsMenu)
+        settingsMenu.add_cascade(label=LabelConstants.SELECTION_MODE, menu=selectModeMenu)
+        settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail(False))
+        settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
+        menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)
-        issueMenu.add_command(label=LabelConstants.LABEL_VIA_DISCORD, command=lambda: webbrowser.open(URLConstants.DISCORD_LINK, new=2))
-        issueMenu.add_command(label=LabelConstants.LABEL_VIA_GITHUB, command=lambda: webbrowser.open(URLConstants.GITHUB_LINK, new=2))
+        issueMenu.add_command(label=LabelConstants.VIA_DISCORD, command=lambda: webbrowser.open(URLConstants.DISCORD, new=2))
+        issueMenu.add_command(label=LabelConstants.VIA_GITHUB, command=lambda: webbrowser.open(URLConstants.GITHUB, new=2))
 
         helpMenu = Menu(menu, tearoff=0)
-        helpMenu.add_cascade(label=LabelConstants.LABEL_REPORT_ISSUE, menu=issueMenu)
-        helpMenu.add_command(label=LabelConstants.LABEL_ABOUT, command=lambda: AboutWindow(self))
-        menu.add_cascade(label=LabelConstants.LABEL_HELP, menu=helpMenu)
+        helpMenu.add_cascade(label=LabelConstants.REPORT_ISSUE, menu=issueMenu)
+        helpMenu.add_command(label=LabelConstants.ABOUT, command=lambda: AboutWindow(self))
+        menu.add_cascade(label=LabelConstants.HELP, menu=helpMenu)
 
         self.window.config(menu=menu)
 
     def addTeamsDropdown(self):
-        labelTeamsDropdown = Label(self.teamsFrame, text=LabelConstants.LABEL_TEAMS_DROPDOWN)
+        labelTeamsDropdown = Label(self.teamsFrame, text=LabelConstants.TEAMS_DROPDOWN)
         labelTeamsDropdown.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.teamDropdown = Combobox(self.teamsFrame, textvariable=self.currentTeam, state="readonly", values=list(self.teams.keys()))
         self.teamDropdown.current(0)
@@ -138,7 +138,7 @@ class MainWindow:
     def addLiveListbox(self):
         frameLiveListBox = Frame(self.streamFrame)
         frameLiveListBox.grid(row=0, column=0, sticky=NSEW, padx=4, pady=(0, 4))
-        labelLiveListBox = Label(frameLiveListBox, text=LabelConstants.LABEL_LIVE_STREAMS)
+        labelLiveListBox = Label(frameLiveListBox, text=LabelConstants.LIVE_STREAMS)
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameLiveListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -151,19 +151,19 @@ class MainWindow:
     def addListBoxButtons(self):
         frameListBoxButtons = Frame(self.streamFrame)
         frameListBoxButtons.grid(row=0, column=1, sticky=NSEW, pady=(0, 4))
-        buttonLeftArrow = Button(frameListBoxButtons, text=LabelConstants.LABEL_LEFT, width=7, command=lambda: self.unselectStreams())
+        buttonLeftArrow = Button(frameListBoxButtons, text=LabelConstants.LEFT, width=7, command=lambda: self.unselectStreams())
         buttonLeftArrow.grid(row=0, sticky=NSEW, padx=4, pady=(38, 4))
-        buttonReset = Button(frameListBoxButtons, text=LabelConstants.LABEL_RESET, width=7, command=lambda: self.reset())
+        buttonReset = Button(frameListBoxButtons, text=LabelConstants.RESET, width=7, command=lambda: self.reset())
         buttonReset.grid(row=1, sticky=NSEW, padx=4, pady=4)
-        buttonRefresh = Button(frameListBoxButtons, text=LabelConstants.LABEL_REFRESH, width=7, command=lambda: self.refresh())
+        buttonRefresh = Button(frameListBoxButtons, text=LabelConstants.REFRESH, width=7, command=lambda: self.refresh())
         buttonRefresh.grid(row=2, sticky=NSEW, padx=4, pady=4)
-        buttonRightArrow = Button(frameListBoxButtons, text=LabelConstants.LABEL_RIGHT, width=7, command=lambda: self.selectStreams())
+        buttonRightArrow = Button(frameListBoxButtons, text=LabelConstants.RIGHT, width=7, command=lambda: self.selectStreams())
         buttonRightArrow.grid(row=3, sticky=NSEW, padx=4, pady=4)
 
     def addSelectedListbox(self):
         frameSelectedListBox = Frame(self.streamFrame)
         frameSelectedListBox.grid(row=0, column=2, sticky=NSEW, pady=(0, 4))
-        labelLiveListBox = Label(frameSelectedListBox, text=LabelConstants.LABEL_SELECTED_STREAMS)
+        labelLiveListBox = Label(frameSelectedListBox, text=LabelConstants.SELECTED_STREAMS)
         labelLiveListBox.grid(row=0, column=0, padx=4, sticky=W)
         scrollbar = Scrollbar(frameSelectedListBox)
         scrollbar.grid(row=1, column=1, sticky="NWS")
@@ -173,14 +173,14 @@ class MainWindow:
         self.selectedListBox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
 
     def addURLDropdown(self):
-        labelSiteDropdown = Label(self.urlFrame, text=LabelConstants.LABEL_STREAM_DROPDOWN)
+        labelSiteDropdown = Label(self.urlFrame, text=LabelConstants.STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
         self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(URLConstants.ORDERED_STREAMING_SITES.keys()))
         self.siteDropdown.bind("<<ComboboxSelected>>", self.updateURLSetting)
         self.siteDropdown.grid(row=1, column=1, sticky=NSEW, padx=4, pady=4)
 
     def addPreviewLabel(self):
-        labelPreview = Label(self.previewLabelFrame, text=LabelConstants.LABEL_PREVIEW)
+        labelPreview = Label(self.previewLabelFrame, text=LabelConstants.PREVIEW)
         labelPreview.grid(sticky=NSEW)
 
     def addPreview(self):
@@ -203,42 +203,42 @@ class MainWindow:
         labelViewers.grid(row=2, sticky=W)
 
     def addFilterFrame(self):
-        labelFilter = Label(self.filterFrame, text=LabelConstants.LABEL_FILTER)
+        labelFilter = Label(self.filterFrame, text=LabelConstants.FILTER)
         labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4, 2), pady=4)
-        self.buttonFilterStreamer = Button(self.filterFrame, text=LabelConstants.LABEL_FILTER_STREAMER, width=13,
+        self.buttonFilterStreamer = Button(self.filterFrame, text=LabelConstants.FILTER_STREAMER, width=13,
                                            command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, None))
         self.buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
-        self.buttonFilterGame = Button(self.filterFrame, text=LabelConstants.LABEL_FILTER_GAME, width=13, command=lambda: self.addFilter(None, self.previewStreamObject.gameTitle))
+        self.buttonFilterGame = Button(self.filterFrame, text=LabelConstants.FILTER_GAME, width=13, command=lambda: self.addFilter(None, self.previewStreamObject.gameTitle))
         self.buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
-        self.buttonFilterCombined = Button(self.filterFrame, text=LabelConstants.LABEL_FILTER_COMBO, width=13,
+        self.buttonFilterCombined = Button(self.filterFrame, text=LabelConstants.FILTER_COMBO, width=13,
                                            command=lambda: self.addFilter(self.previewStreamObject.stylizedStreamName, self.previewStreamObject.gameTitle))
         self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
 
     def addOkButton(self):
-        buttonOk = Button(self.okFrame, text=LabelConstants.LABEL_OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
+        buttonOk = Button(self.okFrame, text=LabelConstants.OPEN_STREAMS, width=50, command=lambda: self.openURL(), anchor=CENTER, relief=RAISED)
         buttonOk.grid(sticky=NSEW, padx=4, pady=4)
 
     def applySettings(self):
         refresh = False
-        if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.LABEL_SETTINGS_JSON]:
-            self.enableFilters.set(self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_FILTERS])
+        if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.enableFilters.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_FILTERS])
             refresh = True
-        if MiscConstants.KEY_SELECTION_MODE in self.settings[LabelConstants.LABEL_SETTINGS_JSON]:
-            selectionMode = self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE]
-            self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE])
+        if MiscConstants.KEY_SELECTION_MODE in self.settings[LabelConstants.SETTINGS_JSON]:
+            selectionMode = self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE]
+            self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE])
         else:
             self.setSelectionModes(False, SINGLE)
-        if MiscConstants.KEY_HIDE_THUMBNAIL in self.settings[LabelConstants.LABEL_SETTINGS_JSON]:
-            self.hideThumbnail.set(self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
+        if MiscConstants.KEY_HIDE_THUMBNAIL in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.hideThumbnail.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
             self.toggleThumbnail(True)
         else:
             self.hideThumbnail.set(False)
-        if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.LABEL_SETTINGS_JSON]:
-            self.site.set(self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
+        if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
         else:
-            self.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.LABEL_URL_TWITCH])
-        if MiscConstants.KEY_TEAM in self.settings[LabelConstants.LABEL_SETTINGS_JSON] and self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
-            self.teamDropdown.set(self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_TEAM])
+            self.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH])
+        if MiscConstants.KEY_TEAM in self.settings[LabelConstants.SETTINGS_JSON] and self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
+            self.teamDropdown.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
             refresh = True
         if refresh:
             self.refresh()
@@ -263,9 +263,9 @@ class MainWindow:
             if newFilter not in self.filters["filters"][filterCategory]:
                 self.filters["filters"][filterCategory].append(newFilter)
                 writeFilters(self.filters)
-                messagebox.showinfo(LabelConstants.LABEL_INFO, MessageConstants.MSG_FILTER_ADDED.format(newFilter["description"]))
+                messagebox.showinfo(LabelConstants.INFO, MessageConstants.FILTER_ADDED.format(newFilter["description"]))
             else:
-                messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_FILTER_ALREADY_EXISTS)
+                messagebox.showerror(LabelConstants.ERROR, MessageConstants.FILTER_ALREADY_EXISTS)
 
     def setFilters(self, newFilters):
         self.filters = newFilters
@@ -286,7 +286,7 @@ class MainWindow:
             else:
                 self.window.geometry('380x474')
             self.hideThumbnail.set(True)
-        self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
         writeSettings(self.settings)
 
     def setSelectionModes(self, isMultipleMode: bool, selectionMode: str):
@@ -296,7 +296,7 @@ class MainWindow:
         else:
             self.multipleSelectMode.set(False)
             self.singleSelectMode.set(True)
-        self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE] = selectionMode
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE] = selectionMode
         writeSettings(self.settings)
         self.liveListBox.configure(selectmode=selectionMode)
         self.selectedListBox.configure(selectmode=selectionMode)
@@ -305,7 +305,7 @@ class MainWindow:
         self.resetPreview()
 
     def updateURLSetting(self, event=None):
-        self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
         writeSettings(self.settings)
 
     def populateLiveListBox(self):
@@ -391,16 +391,16 @@ class MainWindow:
         self.resetPreview()
 
     def setDefaultPreviewLabels(self):
-        self.previewTitle.set(LabelConstants.LABEL_NO_TITLE)
-        self.previewGame.set(LabelConstants.LABEL_GAME)
-        self.previewName.set(LabelConstants.LABEL_STREAMER)
-        self.previewViewers.set(LabelConstants.LABEL_VIEWERS)
+        self.previewTitle.set(LabelConstants.NO_TITLE)
+        self.previewGame.set(LabelConstants.GAME)
+        self.previewName.set(LabelConstants.STREAMER)
+        self.previewViewers.set(LabelConstants.VIEWERS)
 
     def resetPreview(self):
         self.previewStreamObject = None
-        self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.FILE_STREAM_PREVIEW))
+        self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
         self.labelImage.configure(image=self.previewImage)
-        self.boxArtImage = ImageTk.PhotoImage(Image.open(FileConstants.FILE_PREVIEW_BOX_ART))
+        self.boxArtImage = ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART))
         self.labelBoxArt.configure(image=self.boxArtImage)
         self.setFilterButtonsState(DISABLED)
         self.setDefaultPreviewLabels()
@@ -418,14 +418,14 @@ class MainWindow:
         else:
             self.previewTitle.set(thisStream.streamTitle)
         if len(thisStream.gameTitle) > 45:
-            self.previewGame.set(LabelConstants.LABEL_GAME + thisStream.streamTitle[:45] + "...")
+            self.previewGame.set(LabelConstants.GAME + thisStream.streamTitle[:45] + "...")
         else:
-            self.previewGame.set(LabelConstants.LABEL_GAME + thisStream.gameTitle)
-        self.previewName.set(LabelConstants.LABEL_STREAMER + thisStream.streamName)
-        self.previewViewers.set(LabelConstants.LABEL_VIEWERS + thisStream.viewerCount)
-        self.previewImage = self.getImageFromURL(thisStream.previewImage, ImageTk.PhotoImage(Image.open(FileConstants.FILE_STREAM_PREVIEW)))
+            self.previewGame.set(LabelConstants.GAME + thisStream.gameTitle)
+        self.previewName.set(LabelConstants.STREAMER + thisStream.streamName)
+        self.previewViewers.set(LabelConstants.VIEWERS + thisStream.viewerCount)
+        self.previewImage = self.getImageFromURL(thisStream.previewImage, ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW)))
         self.labelImage.configure(image=self.previewImage)
-        self.boxArtImage = self.getImageFromURL(thisStream.boxArtURL, ImageTk.PhotoImage(Image.open(FileConstants.FILE_PREVIEW_BOX_ART)))
+        self.boxArtImage = self.getImageFromURL(thisStream.boxArtURL, ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART)))
         self.labelBoxArt.configure(image=self.boxArtImage)
         self.setFilterButtonsState(NORMAL)
 
@@ -458,7 +458,7 @@ class MainWindow:
             for stream in tmpLiveList:
                 self.liveListBox.insert(END, stream)
             self.liveStreams = refreshStreams
-            self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_TEAM] = self.teamDropdown.get()
+            self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] = self.teamDropdown.get()
             writeSettings(self.settings)
             self.resetPreview()
 
@@ -466,20 +466,20 @@ class MainWindow:
         return stream not in tmpSelectedList
 
     def toggleFilters(self):
-        self.settings[LabelConstants.LABEL_SETTINGS_JSON][MiscConstants.KEY_FILTERS] = self.enableFilters.get()
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_FILTERS] = self.enableFilters.get()
         writeSettings(self.settings)
         self.refresh()
 
     def openURL(self):
         finalURL = URLConstants.ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
         watchingSingleStreamOnTwitch = False
-        if len(self.selectedListBox.get(0, END)) == 1 and finalURL != URLConstants.TWITCH_LINK and messagebox.askyesno(LabelConstants.LABEL_TWITCH, MessageConstants.MSG_WATCH_ON_TWITCH):
-            finalURL = URLConstants.TWITCH_LINK
+        if len(self.selectedListBox.get(0, END)) == 1 and finalURL != URLConstants.TWITCH and messagebox.askyesno(LabelConstants.TWITCH, MessageConstants.WATCH_ON_TWITCH):
+            finalURL = URLConstants.TWITCH
             watchingSingleStreamOnTwitch = True
         if not watchingSingleStreamOnTwitch and not self.siteDropdown.get():
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_NO_SITE_SELECTED)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_SITE_SELECTED)
         elif len(self.selectedListBox.get(0, END)) > 0:
-            if finalURL == URLConstants.TWITCH_LINK:
+            if finalURL == URLConstants.TWITCH:
                 for selectedStream in self.selectedListBox.get(0, END):
                     for stream in self.liveStreams:
                         if stream.stylizedStreamName == selectedStream:
@@ -491,13 +491,13 @@ class MainWindow:
                             finalURL += stream.streamName + "/"
                 webbrowser.open(finalURL, new=2)
         else:
-            messagebox.showerror(LabelConstants.LABEL_ERROR, MessageConstants.MSG_NO_STREAMS_SELECTED)
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_STREAMS_SELECTED)
 
     def isFiltered(self, stream):
         if self.enableFilters.get():
-            isGameFiltered = stream.gameTitle in [x["description"] for x in self.filters["filters"][LabelConstants.LABEL_FILTER_KEY_GAME]]
-            isStreamFiltered = stream.stylizedStreamName in [x["description"] for x in self.filters["filters"][LabelConstants.LABEL_FILTER_KEY_STREAMER]]
-            isComboFiltered = stream.stylizedStreamName + " streaming " + stream.gameTitle in [x["description"] for x in self.filters["filters"][LabelConstants.LABEL_FILTER_KEY_COMBINED]]
+            isGameFiltered = stream.gameTitle in [x["description"] for x in self.filters["filters"][LabelConstants.FILTER_KEY_GAME]]
+            isStreamFiltered = stream.stylizedStreamName in [x["description"] for x in self.filters["filters"][LabelConstants.FILTER_KEY_STREAMER]]
+            isComboFiltered = stream.stylizedStreamName + " streaming " + stream.gameTitle in [x["description"] for x in self.filters["filters"][LabelConstants.FILTER_KEY_COMBINED]]
             return isGameFiltered or isStreamFiltered or isComboFiltered
         return False
 
