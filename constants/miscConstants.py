@@ -1,0 +1,12 @@
+class MiscConstants:
+    BEARER = "Bearer "
+    CLIENT_ID = "dzdcecm2nwr4j6ywb349cyvv81i9sv"
+    OAUTH = "OAuth "
+    SCOPES = "user_read"
+    RESPONSE_TYPE = "token"
+    TITLE_ACCESS_TOKEN = "Enter Access Token"
+    KEY_SELECTION_MODE = "selectionMode"
+    KEY_HIDE_THUMBNAIL = "hideThumbnail"
+    KEY_OPEN_STREAMS_ON = "openStreamsOn"
+    KEY_TEAM = "team"
+    KEY_FILTERS = "enableFilters"
