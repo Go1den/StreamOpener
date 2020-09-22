@@ -1,10 +1,10 @@
 from tkinter import Toplevel, Frame, NSEW, E, Label, Entry, StringVar, Button, W, messagebox
 from tkinter.ttk import Combobox
 
-from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants
 from twitchapi import isRecognizedTwitchGame
+from windows.windowHelper import WindowHelper
 
 class NewFilterWindow:
     def __init__(self, parent):
@@ -18,20 +18,11 @@ class NewFilterWindow:
         self.comboboxStream = None
         self.game = StringVar()
 
-        self.initializeWindow()
+        WindowHelper.initializeWindow(self.window, self.parent, 324, 140, 30, 50, LabelConstants.NEW_FILTER_WINDOW)
         self.gridFrames()
         self.addEntryFrame()
         self.addButtonFrame()
-        self.finalizeWindow()
-
-    def initializeWindow(self):
-        self.parent.window.attributes('-disabled', 1)
-        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
-        self.window.geometry('324x140+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
-        self.window.title(LabelConstants.NEW_FILTER_WINDOW)
-        self.window.resizable(False, False)
-        self.window.transient(self.parent.window)
-        self.window.grab_set()
+        WindowHelper.finalizeWindow(self.window, self.parent)
 
     def gridFrames(self):
         self.entryFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
@@ -82,9 +73,3 @@ class NewFilterWindow:
             else:
                 self.parent.addFilter(key, newFilter)
                 self.window.destroy()
-
-    def finalizeWindow(self):
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()

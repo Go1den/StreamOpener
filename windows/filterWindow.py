@@ -1,10 +1,10 @@
 from copy import deepcopy
 from tkinter import Toplevel, Frame, NSEW, Label, Scrollbar, Listbox, MULTIPLE, NONE, END, Button, W
 
-from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from listboxHelper import alphabeticallyInsert
 from windows.newFilterWindow import NewFilterWindow
+from windows.windowHelper import WindowHelper
 
 class FilterWindow:
     def __init__(self, parent):
@@ -19,20 +19,11 @@ class FilterWindow:
         self.filterStreamListbox = None
         self.filterCombinedListbox = None
 
-        self.initializeWindow()
+        WindowHelper.initializeWindow(self.window, self.parent, 460, 630, 30, 50, LabelConstants.FILTER_WINDOW)
         self.gridFrames()
         self.addFilterListbox()
         self.addButtons()
-        self.finalizeWindow()
-
-    def initializeWindow(self):
-        self.parent.window.attributes('-disabled', 1)
-        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
-        self.window.geometry('460x630+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
-        self.window.title(LabelConstants.FILTER_WINDOW)
-        self.window.resizable(width=False, height=False)
-        self.window.transient(self.parent.window)
-        self.window.grab_set()
+        WindowHelper.finalizeWindow(self.window, self.parent)
 
     def gridFrames(self):
         self.filterFrame.grid(row=0, sticky=NSEW, padx=4, pady=4)
@@ -90,12 +81,6 @@ class FilterWindow:
         buttonOk.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
         buttonCancel = Button(self.buttonFrame, text=LabelConstants.CANCEL, width=13, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
-
-    def finalizeWindow(self):
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
 
     def delete(self):
         self.deleteByListbox(self.filterGameListbox, LabelConstants.FILTER_KEY_GAME)

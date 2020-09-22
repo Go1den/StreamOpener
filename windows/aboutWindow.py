@@ -4,6 +4,7 @@ from tkinter import Button, W, Toplevel, Label, LEFT, PhotoImage, Frame, SE
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from constants.urlConstants import URLConstants
+from windows.windowHelper import WindowHelper
 
 class AboutWindow:
     def __init__(self, parent):
@@ -14,18 +15,9 @@ class AboutWindow:
         self.frameTop = Frame(self.window)
         self.aboutImage = PhotoImage(file=FileConstants.STREAMOPENER_ICON_64)
 
-        self.initializeWindow()
+        WindowHelper.initializeWindow(self.window, self.parent, 0, 0, 60, 100, LabelConstants.ABOUT)
         self.addAboutFrame()
-        self.finalizeWindow()
-
-    def initializeWindow(self):
-        self.parent.window.attributes('-disabled', 1)
-        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
-        self.window.geometry('+{x}+{y}'.format(x=self.parent.window.winfo_x() + 60, y=self.parent.window.winfo_y() + 100))
-        self.window.title(LabelConstants.ABOUT)
-        self.window.resizable(False, False)
-        self.window.transient(self.parent.window)
-        self.window.grab_set()
+        WindowHelper.finalizeWindow(self.window, self.parent)
 
     def addAboutFrame(self):
         aboutImageLabel = Label(self.frameTop, image=self.aboutImage)
@@ -51,9 +43,3 @@ class AboutWindow:
 
         okButton = Button(self.window, text=LabelConstants.OK, width=8, command=lambda: self.window.destroy())
         okButton.grid(row=5, column=0, sticky=SE, pady=4, padx=4)
-
-    def finalizeWindow(self):
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
