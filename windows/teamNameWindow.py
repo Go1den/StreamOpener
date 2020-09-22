@@ -3,6 +3,7 @@ from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, mess
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants
+from windows.windowHelper import WindowHelper
 
 class TeamNameWindow:
     def __init__(self, parent):
@@ -14,20 +15,11 @@ class TeamNameWindow:
         self.entryFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
 
-        self.initializeWindow()
+        WindowHelper.initializeWindow(self.window, self.parent, 260, 106, 30, 50, LabelConstants.TEAM_NAME_WINDOW)
         self.gridFrames()
         self.addEntryFrame()
         self.addButtonFrame()
-        self.finalizeWindow()
-
-    def initializeWindow(self):
-        self.parent.window.attributes('-disabled', 1)
-        self.window.iconbitmap(FileConstants.STREAMOPENER_ICON)
-        self.window.geometry('260x106+{x}+{y}'.format(x=self.parent.window.winfo_x() + 30, y=self.parent.window.winfo_y() + 50))
-        self.window.title(LabelConstants.TEAM_NAME_WINDOW)
-        self.window.resizable(width=False, height=False)
-        self.window.transient(self.parent.window)
-        self.window.grab_set()
+        WindowHelper.finalizeWindow(self.window, self.parent)
 
     def gridFrames(self):
         self.entryFrame.grid(row=0, padx=4, pady=4, sticky=NSEW)
@@ -45,12 +37,6 @@ class TeamNameWindow:
         buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         buttonCancel = Button(self.buttonFrame, text=LabelConstants.CANCEL, width=8, command=lambda: self.window.destroy())
         buttonCancel.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
-
-    def finalizeWindow(self):
-        self.window.deiconify()
-        self.parent.window.wait_window(self.window)
-        self.parent.window.attributes('-disabled', 0)
-        self.parent.window.deiconify()
 
     def ok(self):
         self.teamName.set(self.teamName.get().strip())
