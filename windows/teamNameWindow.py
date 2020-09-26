@@ -1,6 +1,5 @@
 from tkinter import Toplevel, Frame, NSEW, StringVar, Label, Entry, Button, messagebox, E
 
-from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants
 from windows.windowHelper import WindowHelper
