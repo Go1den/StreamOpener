@@ -418,7 +418,7 @@ class MainWindow:
         else:
             self.previewTitle.set(thisStream.streamTitle)
         if len(thisStream.gameTitle) > 45:
-            self.previewGame.set(LabelConstants.GAME + thisStream.streamTitle[:45] + "...")
+            self.previewGame.set(LabelConstants.GAME + thisStream.gameTitle[:45] + "...")
         else:
             self.previewGame.set(LabelConstants.GAME + thisStream.gameTitle)
         self.previewName.set(LabelConstants.STREAMER + thisStream.streamName)
