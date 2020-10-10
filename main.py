@@ -1,6 +1,6 @@
 from credentials import Credentials
 from twitchapi import authorize, validateOAuth
-from windows.mainWindow import MainWindow
+from windows.mainWindow2 import MainWindow2
 
 oAuth = None
 
@@ -11,5 +11,9 @@ else:
         oAuth = f.read().rstrip()
 
 credentials = Credentials(oAuth)
-w = MainWindow(credentials)
+
+# Experimental
+w = MainWindow2(credentials)
+
+# w = MainWindow(credentials)
 w.window.mainloop()
