@@ -1,7 +1,8 @@
-from tkinter import Tk, NSEW
+from tkinter import Tk, NSEW, Frame
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
+from frames.scrollableFrame import ScrollableFrame
 from frames.streamFrame import StreamFrame
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams
 
@@ -9,9 +10,14 @@ class MainWindow2:
     def __init__(self, credentials):
         self.window = Tk()
         self.window.withdraw()
+        self.windowFrame = Frame(self.window)
+        self.scrollableFrame = ScrollableFrame(1010, 680, self.windowFrame)
         self.credentials = credentials
         self.followedStreams = getAllStreamsUserFollows(credentials.oauth, credentials.user_id)
         self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
+
+        self.windowFrame.grid()
+        self.scrollableFrame.grid()
 
         self.gridFrames()
         self.initializeWindow()
@@ -21,7 +27,7 @@ class MainWindow2:
         i = 0
         j = 0
         for stream in self.liveStreams:
-            streamFrame = StreamFrame(stream, self.window)
+            streamFrame = StreamFrame(stream, self.window, self.scrollableFrame.scrollable_frame)
             streamFrame.frame.grid(row=i, column=j, sticky=NSEW, padx=4, pady=4)
             j += 1
             if j == 3:
@@ -33,8 +39,3 @@ class MainWindow2:
         self.window.geometry('1280x720')
         self.window.title(LabelConstants.STREAMOPENER)
         self.window.resizable(width=False, height=False)
-
-
-
-
-

@@ -8,8 +8,8 @@ from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 
 class StreamFrame:
-    def __init__(self, stream, window):
-        self.frame = Frame(window, relief=GROOVE, bd=2)
+    def __init__(self, stream, window, scrollWindow):
+        self.frame = Frame(scrollWindow, relief=GROOVE, bd=2)
         self.stream = stream
         self.parent = window
 
