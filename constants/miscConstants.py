@@ -10,3 +10,4 @@ class MiscConstants:
     KEY_OPEN_STREAMS_ON = "openStreamsOn"
     KEY_TEAM = "team"
     KEY_FILTERS = "enableFilters"
+    BIND_LEFT_MOUSE = "<Button-1>"

@@ -6,10 +6,12 @@ from PIL import ImageTk, Image
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
+from constants.miscConstants import MiscConstants
+from stream import Stream
 
 class StreamFrame:
-    def __init__(self, stream, window, scrollWindow):
-        self.frame = Frame(scrollWindow, relief=GROOVE, bd=2)
+    def __init__(self, stream: Stream, window, scrollWindow):
+        self.frame = Frame(scrollWindow, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=2)
         self.stream = stream
         self.parent = window
 
@@ -61,7 +63,7 @@ class StreamFrame:
             self.previewImage = self.getImageFromURL(self.stream.previewImage, ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW)))
         else:
             self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
-        self.previewName.set(self.stream.streamName)
+        self.previewName.set(self.stream.stylizedStreamName)
         if len(self.stream.gameTitle) > 45:
             self.previewGame.set(LabelConstants.GAME + self.stream.gameTitle[:45] + "...")
         else:
@@ -70,14 +72,19 @@ class StreamFrame:
 
     def addPreview(self):
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
+        self.labelImage.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         self.labelImage.grid(row=1, sticky=W)
-        labelTitle = Label(self.previewFrame, textvariable=self.previewTitle)
+        labelTitle = Label(self.previewFrame, textvariable=self.previewTitle, fg="white", bg="black")
+        labelTitle.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         labelTitle.grid(row=1, sticky=NW, padx=4, pady=4)
         self.labelBoxArt = Label(self.previewFrame, image=self.boxArtImage, bd=1)
+        self.labelBoxArt.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         self.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
-        labelName = Label(self.previewFrame, textvariable=self.previewName)
+        labelName = Label(self.previewFrame, textvariable=self.previewName, fg="white", bg="#b71ef7")
+        labelName.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         labelName.grid(row=1, sticky=S, padx=4, pady=4)
-        labelViewers = Label(self.previewFrame, textvariable=self.previewViewers)
+        labelViewers = Label(self.previewFrame, textvariable=self.previewViewers, fg="white", bg="black")
+        labelViewers.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         labelViewers.grid(row=1, sticky=SE, padx=4, pady=4)
 
     def addFilterFrame(self):
@@ -90,7 +97,7 @@ class StreamFrame:
         self.buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
         self.buttonFilterCombined = Button(self.filterFrame, text=LabelConstants.FILTER_COMBO, width=13,
                                            command=lambda: self.parent.addFilter(self.stream.stylizedStreamName, self.stream.gameTitle))
-        self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=4, pady=4)
+        self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=(4,0), pady=4)
 
     def getImageFromURL(self, url, defaultImage) -> ImageTk.PhotoImage:
         try:
@@ -99,3 +106,9 @@ class StreamFrame:
             return ImageTk.PhotoImage(im)
         except ValueError:
             return defaultImage
+
+    def onClick(self, event):
+        if self.frame.cget("highlightbackground") == "red":
+            self.frame.config(highlightbackground="grey", highlightcolor="grey")
+        else:
+            self.frame.config(highlightbackground="red", highlightcolor="red")
