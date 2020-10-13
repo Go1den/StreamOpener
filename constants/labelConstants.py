@@ -1,4 +1,5 @@
 class LabelConstants:
+    REMOVE = "Remove Selected"
     URL_TWITCH = "Twitch (Multiple tabs)"
     URL_KADGAR = "Kadgar"
     URL_MULTISTREAM = "MultiStream"
@@ -43,6 +44,11 @@ class LabelConstants:
     FREE_AGENTS = "Free Agents"
     TEAM_MEMBERS = "Team Members"
     TEAMS_DROPDOWN = "Team:"
+    SEARCH_TEAMS = "Team:"
+    SEARCH_TAG = "Tag:"
+    ADD = "Add"
+    FILTERS = "Filters"
+    APPLIED_FILTERS = "Applied Filters:"
     ALL_TEAM = "All"
     TEAM_NAME_WINDOW = "Team Name"
     TEAM_NAME = "Enter a team name."
