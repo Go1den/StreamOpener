@@ -18,7 +18,7 @@ class LabelConstants:
     TWITCH = "Twitch"
     ERROR = "Error"
     LIVE_STREAMS = "Live Streams"
-    SELECTED_STREAMS = "Selected Streams"
+    SELECTED_STREAMS = "Selected Streams:"
     REFRESH = "Refresh"
     RESET = "Reset"
     LEFT = "← Move"
