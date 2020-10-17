@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, CENTER, RAISED
+from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, CENTER, RAISED, GROOVE
 from tkinter.ttk import Combobox
 
 from constants.labelConstants import LabelConstants
@@ -6,7 +6,7 @@ from constants.urlConstants import URLConstants
 
 class SearchFrame:
     def __init__(self, window):
-        self.frame = Frame(window)
+        self.frame = Frame(window, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
         self.parent = window
 
         self.site = StringVar()
@@ -93,13 +93,13 @@ class SearchFrame:
     def populateUrlFrame(self):
         labelSiteDropdown = Label(self.urlFrame, text=LabelConstants.STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=0, column=0, sticky=W, padx=4, pady=4)
-        self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(URLConstants.ORDERED_STREAMING_SITES.keys()))
+        self.siteDropdown = Combobox(self.urlFrame, textvariable=self.site, state="readonly", values=list(URLConstants.ORDERED_STREAMING_SITES.keys()), width=32)
         self.siteDropdown.bind("<<ComboboxSelected>>", self.updateURLSetting)
         self.siteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
 
     def populateStreamButtonFrame(self):
-        self.buttonOk = Button(self.streamButtonFrame, text=LabelConstants.OPEN_STREAMS, width=28, command=lambda: self.openURL())
-        self.buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
+        self.buttonOk = Button(self.streamButtonFrame, text=LabelConstants.OPEN_STREAMS, width=30, command=lambda: self.openURL())
+        self.buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=25)
 
     def addFilter(self):
         messagebox.showinfo("Ok", "Filter added.")

@@ -57,7 +57,7 @@ class LabelConstants:
     RENAME = "Rename"
     DELETE = "Delete"
     SETTINGS_JSON = "settings"
-    ABOUT_WINDOW_INFO = "StreamOpener\n\nVersion 2.2\n\nReleased: 8/1/2020"
+    ABOUT_WINDOW_INFO = "StreamOpener\n\nVersion 3.0\n\nReleased: 10/31/2020"
     ABOUT_ME = "Hello. I'm Go1den. I developed StreamOpener.\nI do not plan to charge for this program ever.\nIf you would like to support me:"
     SUBSCRIBE_TWITCH = "Subscribe to my Twitch channel!"
     VISIT_MY_WEBSITE = "Visit my website!"

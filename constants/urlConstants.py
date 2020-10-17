@@ -3,7 +3,7 @@ from collections import OrderedDict
 from constants.labelConstants import LabelConstants
 
 class URLConstants:
-    DISCORD = "https://discord.gg/nqWxgHm"
+    DISCORD = "https://discord.gg/T4nykvK"
     GITHUB = "https://github.com/Go1den/StreamOpener/issues"
     TWITCH_VALIDATE = "https://id.twitch.tv/oauth2/validate"
     TWITCH_OAUTH = "https://id.twitch.tv/oauth2/authorize"

@@ -11,7 +11,7 @@ from stream import Stream
 
 class StreamFrame:
     def __init__(self, stream: Stream, window, scrollWindow):
-        self.frame = Frame(scrollWindow, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=2)
+        self.frame = Frame(scrollWindow, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=3)
         self.stream = stream
         self.parent = window
 
