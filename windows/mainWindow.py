@@ -472,6 +472,7 @@ class MainWindow:
 
     def openURL(self):
         finalURL = URLConstants.ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
+        isRareDrop = finalURL == URLConstants.RAREDROP
         watchingSingleStreamOnTwitch = False
         if len(self.selectedListBox.get(0, END)) == 1 and finalURL != URLConstants.TWITCH and messagebox.askyesno(LabelConstants.TWITCH, MessageConstants.WATCH_ON_TWITCH):
             finalURL = URLConstants.TWITCH
@@ -488,7 +489,10 @@ class MainWindow:
                 for selectedStream in self.selectedListBox.get(0, END):
                     for stream in self.liveStreams:
                         if stream.stylizedStreamName == selectedStream:
-                            finalURL += stream.streamName + "/"
+                            if isRareDrop:
+                                finalURL += "t" + stream.streamName + "/"
+                            else:
+                                finalURL += stream.streamName + "/"
                 webbrowser.open(finalURL, new=2)
         else:
             messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_STREAMS_SELECTED)
