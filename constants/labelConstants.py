@@ -5,6 +5,7 @@ class LabelConstants:
     URL_MULTISTREAM = "MultiStream"
     URL_MULTITWITCH = "MultiTwitch"
     URL_TWITCHTHEATER = "TwitchTheater"
+    URL_RAREDROP = "Rare Drop"
     EDIT = "Edit"
     INFO = "Info"
     CANCEL = "Cancel"
