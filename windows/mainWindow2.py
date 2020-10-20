@@ -1,13 +1,14 @@
 import sys
 import webbrowser
-from tkinter import Tk, NSEW, Frame, Menu, SINGLE, MULTIPLE, BooleanVar
+from tkinter import Tk, NSEW, Frame, Menu, BooleanVar
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
+from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
+from fileHandler import writeSettings, readSettings, readTeams
 from frames.scrollableFrame import ScrollableFrame
 from frames.searchFrame import SearchFrame
-from frames.streamFrame import StreamFrame
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams
 from windows.aboutWindow import AboutWindow
 from windows.filterWindow import FilterWindow
@@ -17,10 +18,13 @@ class MainWindow2:
     def __init__(self, credentials):
         self.window = Tk()
         self.window.withdraw()
+        self.credentials = credentials
+        self.settings = readSettings()
+        self.followedStreams = getAllStreamsUserFollows(credentials.oauth, credentials.user_id)
+        self.teams = readTeams(self.followedStreams)
+
         self.windowFrame = Frame(self.window)
         self.scrollableFrame = ScrollableFrame(1010, 680, self.windowFrame)
-        self.credentials = credentials
-        self.followedStreams = getAllStreamsUserFollows(credentials.oauth, credentials.user_id)
         self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
 
         self.singleSelectMode = BooleanVar()
@@ -30,25 +34,17 @@ class MainWindow2:
 
         self.searchFrame = SearchFrame(self.windowFrame)
 
+        self.initializeWindow()
         self.gridFrames()
         self.addMenu()
-        self.initializeWindow()
+        self.applySettings()
         self.window.deiconify()
 
     def gridFrames(self):
-        i = 0
-        j = 0
         for stream in self.liveStreams:
-            streamFrame = StreamFrame(stream, self.window, self.scrollableFrame.scrollable_frame)
-            streamFrame.frame.grid(row=i, column=j, sticky=NSEW, padx=4, pady=4)
-            j += 1
-            if j == 3:
-                i += 1
-                j = 0
-
+            self.scrollableFrame.addStreamFrame(stream)
         self.searchFrame.frame.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.scrollableFrame.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
-
         self.windowFrame.grid()
 
     def addMenu(self):
@@ -63,13 +59,8 @@ class MainWindow2:
         manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
         menu.add_cascade(label=LabelConstants.EDIT, menu=manageMenu)
 
-        selectModeMenu = Menu(menu, tearoff=0)
-        selectModeMenu.add_checkbutton(label=LabelConstants.SINGLE, variable=self.singleSelectMode, command=lambda: self.setSelectionModes(False, SINGLE))
-        selectModeMenu.add_checkbutton(label=LabelConstants.MULTIPLE, variable=self.multipleSelectMode, command=lambda: self.setSelectionModes(True, MULTIPLE))
-
         settingsMenu = Menu(menu, tearoff=0)
-        settingsMenu.add_cascade(label=LabelConstants.SELECTION_MODE, menu=selectModeMenu)
-        settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail(False))
+        settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail())
         settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
         menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
@@ -92,3 +83,37 @@ class MainWindow2:
 
     def closeWindow(self):
         sys.exit(0)
+
+    def toggleThumbnail(self):
+        if self.hideThumbnail.get():
+            self.scrollableFrame.showThumbnails(False)
+        else:
+            self.scrollableFrame.showThumbnails(True)
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
+        writeSettings(self.settings)
+
+    def applySettings(self):
+        # refresh = False
+        # if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.SETTINGS_JSON]:
+        #     self.enableFilters.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_FILTERS])
+        #     refresh = True
+        # if MiscConstants.KEY_SELECTION_MODE in self.settings[LabelConstants.SETTINGS_JSON]:
+        #     selectionMode = self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE]
+        #     self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE])
+        # else:
+        #     self.setSelectionModes(False, SINGLE)
+        if MiscConstants.KEY_HIDE_THUMBNAIL in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.hideThumbnail.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
+            # self.toggleThumbnail()
+        else:
+            self.hideThumbnail.set(False)
+        self.scrollableFrame.showThumbnails(not self.hideThumbnail.get())
+        # if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
+        #     self.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
+        # else:
+        #     self.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH])
+        # if MiscConstants.KEY_TEAM in self.settings[LabelConstants.SETTINGS_JSON] and self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
+        #     self.teamDropdown.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
+        #     refresh = True
+        # if refresh:
+        #     self.refresh()

@@ -48,7 +48,7 @@ class LabelConstants:
     SEARCH_TEAMS = "Team:"
     SEARCH_TAG = "Tag:"
     ADD = "Add"
-    FILTERS = "Filters"
+    FILTERS = "Narrow Results By:"
     APPLIED_FILTERS = "Applied Filters:"
     ALL_TEAM = "All"
     TEAM_NAME_WINDOW = "Team Name"

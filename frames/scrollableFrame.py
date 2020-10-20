@@ -1,11 +1,22 @@
 from tkinter import ttk, NSEW, Canvas
 
+from PIL import ImageTk, Image
+
+from constants.fileConstants import FileConstants
+from frames.streamFrame import StreamFrame
+
 class ScrollableFrame(ttk.Frame):
     def __init__(self, width, height, container, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
         self.canvas = Canvas(self)
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = ttk.Frame(self.canvas)
+        self.streamFrames = []
+        self.windowFrame = container
+        self.currentRow = 0
+        self.currentColumn = 0
+
+        self.DEFAULT_STREAM_PREVIEW = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
 
         self.scrollable_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
@@ -24,3 +35,21 @@ class ScrollableFrame(ttk.Frame):
 
     def onMouseWheel(self, event):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    def addStreamFrame(self, stream):
+        streamFrame = StreamFrame(stream, self.windowFrame.master, self.scrollable_frame)
+        streamFrame.frame.grid(row=self.currentRow, column=self.currentColumn, sticky=NSEW, padx=4, pady=4)
+        self.streamFrames.append(streamFrame)
+        self.currentColumn += 1
+        if self.currentColumn == 3:
+            self.currentRow += 1
+            self.currentColumn = 0
+
+    def showThumbnails(self, showThumbnails):
+        for streamFrame in self.streamFrames:
+            if showThumbnails:
+                print("Switching to preview image")
+                streamFrame.labelImage.configure(image=streamFrame.previewImage)
+            else:
+                print("Switching to default image")
+                streamFrame.labelImage.configure(image=self.DEFAULT_STREAM_PREVIEW)
