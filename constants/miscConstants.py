@@ -1,4 +1,5 @@
 class MiscConstants:
+    KEY_HIDE_BOXART = "hideBoxArt"
     BEARER = "Bearer "
     CLIENT_ID = "dzdcecm2nwr4j6ywb349cyvv81i9sv"
     OAUTH = "OAuth "

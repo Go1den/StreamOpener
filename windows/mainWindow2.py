@@ -9,7 +9,7 @@ from constants.urlConstants import URLConstants
 from fileHandler import writeSettings, readSettings, readTeams
 from frames.scrollableFrame import ScrollableFrame
 from frames.searchFrame import SearchFrame
-from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams
+from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, getAllTwitchTags
 from windows.aboutWindow import AboutWindow
 from windows.filterWindow import FilterWindow
 from windows.teamWindow import TeamWindow
@@ -20,8 +20,9 @@ class MainWindow2:
         self.window.withdraw()
         self.credentials = credentials
         self.settings = readSettings()
-        self.followedStreams = getAllStreamsUserFollows(credentials.oauth, credentials.user_id)
+        self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
         self.teams = readTeams(self.followedStreams)
+        self.tags = getAllTwitchTags(self.credentials.oauth)
 
         self.windowFrame = Frame(self.window)
         self.scrollableFrame = ScrollableFrame(1010, 680, self.windowFrame)
@@ -30,9 +31,10 @@ class MainWindow2:
         self.singleSelectMode = BooleanVar()
         self.multipleSelectMode = BooleanVar()
         self.hideThumbnail = BooleanVar()
+        self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
 
-        self.searchFrame = SearchFrame(self.windowFrame)
+        self.searchFrame = SearchFrame(self)
 
         self.initializeWindow()
         self.gridFrames()
@@ -57,10 +59,12 @@ class MainWindow2:
         manageMenu = Menu(menu, tearoff=0)
         manageMenu.add_command(label=LabelConstants.SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
+        manageMenu.add_command(label=LabelConstants.SETTINGS_TAG_WINDOW)
         menu.add_cascade(label=LabelConstants.EDIT, menu=manageMenu)
 
         settingsMenu = Menu(menu, tearoff=0)
         settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail())
+        settingsMenu.add_checkbutton(label=LabelConstants.HIDE_BOXART, variable=self.hideBoxArt, command=lambda: self.toggleBoxArt())
         settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
         menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
@@ -92,6 +96,15 @@ class MainWindow2:
         self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL] = self.hideThumbnail.get()
         writeSettings(self.settings)
 
+    def toggleBoxArt(self):
+        if self.hideBoxArt.get():
+            self.scrollableFrame.showBoxArt(False)
+        else:
+            self.scrollableFrame.showBoxArt(True)
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART] = self.hideBoxArt.get()
+        writeSettings(self.settings)
+
+
     def applySettings(self):
         # refresh = False
         # if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.SETTINGS_JSON]:
@@ -108,6 +121,12 @@ class MainWindow2:
         else:
             self.hideThumbnail.set(False)
         self.scrollableFrame.showThumbnails(not self.hideThumbnail.get())
+
+        if MiscConstants.KEY_HIDE_BOXART in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.hideBoxArt.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART])
+        else:
+            self.hideBoxArt.set(False)
+        self.scrollableFrame.showBoxArt(not self.hideBoxArt.get())
         # if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
         #     self.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
         # else:

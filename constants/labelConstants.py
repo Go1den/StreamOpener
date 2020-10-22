@@ -1,4 +1,8 @@
 class LabelConstants:
+    HIDE_BOXART = "Hide Box Art"
+    SETTINGS_TAG_WINDOW = "Tags..."
+    APPLY_TAGS = "Apply Tags"
+    CLEAR_ALL = "Clear All"
     REMOVE = "Remove Selected"
     URL_TWITCH = "Twitch (Multiple tabs)"
     URL_KADGAR = "Kadgar"

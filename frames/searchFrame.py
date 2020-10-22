@@ -1,15 +1,16 @@
-from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, CENTER, RAISED, GROOVE
+from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, GROOVE, END
 from tkinter.ttk import Combobox
 
 from constants.labelConstants import LabelConstants
 from constants.urlConstants import URLConstants
 
 class SearchFrame:
-    def __init__(self, window):
-        self.frame = Frame(window, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
-        self.parent = window
+    def __init__(self, parent):
+        self.parent = parent
+        self.frame = Frame(self.parent.windowFrame, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
 
         self.site = StringVar()
+        self.currentTeam = StringVar()
 
         self.filterFrame = Frame(self.frame)
         self.appliedFilterFrame = Frame(self.frame)
@@ -52,32 +53,28 @@ class SearchFrame:
 
         labelTeam = Label(self.filterFrame, text=LabelConstants.SEARCH_TEAMS)
         labelTeam.grid(row=1, column=0, sticky=W, columnspan=2, padx=4, pady=4)
-        self.comboboxTeam = Combobox(self.filterFrame, values=[1, 2, 3, 4], state="readonly")
-        self.comboboxTeam.grid(row=2, column=0, padx=4, pady=4)
-        self.buttonTeam = Button(self.filterFrame, text=LabelConstants.ADD, width=8, command=lambda: self.addFilter())
-        self.buttonTeam.grid(row=2, column=1, padx=4, pady=4)
-
-        labelTag = Label(self.filterFrame, text=LabelConstants.SEARCH_TAG)
-        labelTag.grid(row=3, column=0, sticky=W, columnspan=2, padx=4, pady=4)
-        self.comboboxTag = Combobox(self.filterFrame, values=[1, 2, 3, 4], state="readonly")
-        self.comboboxTag.grid(row=4, column=0, padx=4, pady=4)
-        self.buttonTag = Button(self.filterFrame, text=LabelConstants.ADD, width=8, command=lambda: self.addFilter())
-        self.buttonTag.grid(row=4, column=1, padx=4, pady=4)
+        self.comboboxTeam = Combobox(self.filterFrame, textvariable=self.currentTeam, values=list(self.parent.teams.keys()), state="readonly", width=32)
+        self.comboboxTeam.grid(row=2, column=0, columnspan=2, padx=4, pady=4)
 
     def populateAppliedFilterFrame(self):
-        labelAppliedFilters = Label(self.appliedFilterFrame, text=LabelConstants.APPLIED_FILTERS)
+        labelAppliedFilters = Label(self.appliedFilterFrame, text=LabelConstants.SEARCH_TAG)
         labelAppliedFilters.grid(row=0, column=0, sticky=W, columnspan=2, padx=4, pady=4)
         scrollbarAppliedFilters = Scrollbar(self.appliedFilterFrame)
         scrollbarAppliedFilters.grid(row=1, column=1, sticky="NWS")
         self.appliedFiltersListbox = Listbox(self.appliedFilterFrame, selectmode=MULTIPLE, yscrollcommand=scrollbarAppliedFilters.set, activestyle=NONE, width=33)
         scrollbarAppliedFilters.config(command=self.appliedFiltersListbox.yview)
+        self.populateTwitchTagsListbox()
         self.appliedFiltersListbox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
         self.appliedFiltersListbox.configure(exportselection=False)
 
+    def populateTwitchTagsListbox(self):
+        for tag in list(map(lambda x: x.localizationNames['en-us'], self.parent.tags)):
+            self.appliedFiltersListbox.insert(END, tag)
+
     def populateButtonFrame(self):
-        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.REMOVE, width=18, command=lambda: self.removeSelected())
+        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.CLEAR_ALL, width=13, command=lambda: self.removeSelected())
         self.buttonRemove.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.RESET, width=8, command=lambda: self.reset())
+        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.APPLY_TAGS, width=13, command=lambda: self.reset())
         self.buttonReset.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def populateSelectedStreamsFrame(self):
@@ -115,4 +112,3 @@ class SearchFrame:
 
     def openURL(self):
         messagebox.showinfo("Ok", "URL opened.")
-

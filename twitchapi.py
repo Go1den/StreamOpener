@@ -113,7 +113,7 @@ def getAllTwitchTags(oAuth):
             params["after"] = jsonTags["pagination"]["cursor"]
         except KeyError:
             moreTags = False
-    return tags
+    return sorted(tags, key=lambda x: x.localizationNames["en-us"].casefold())
 
 def isRecognizedTwitchGame(oAuth, game) -> bool:
     headers = getAuthorizedHeader(oAuth)

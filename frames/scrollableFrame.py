@@ -1,4 +1,4 @@
-from tkinter import ttk, NSEW, Canvas
+from tkinter import ttk, NSEW, Canvas, SW
 
 from PIL import ImageTk, Image
 
@@ -48,8 +48,13 @@ class ScrollableFrame(ttk.Frame):
     def showThumbnails(self, showThumbnails):
         for streamFrame in self.streamFrames:
             if showThumbnails:
-                print("Switching to preview image")
                 streamFrame.labelImage.configure(image=streamFrame.previewImage)
             else:
-                print("Switching to default image")
                 streamFrame.labelImage.configure(image=self.DEFAULT_STREAM_PREVIEW)
+
+    def showBoxArt(self, showBoxArt):
+        for streamFrame in self.streamFrames:
+            if showBoxArt:
+                streamFrame.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
+            else:
+                streamFrame.labelBoxArt.grid_forget()
