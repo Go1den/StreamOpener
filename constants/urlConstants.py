@@ -10,6 +10,7 @@ class URLConstants:
     TWITCH_USER_FOLLOWS = "https://api.twitch.tv/helix/users/follows"
     TWITCH_LIVE_FOLLOWED = "https://api.twitch.tv/helix/streams"
     TWITCH_GAME_INFO = "https://api.twitch.tv/helix/games"
+    TWITCH_ALL_TAGS = "https://api.twitch.tv/helix/tags/streams"
     TWITCH = "https://twitch.tv/"
     TWITCH_GO1DEN_SUBSCRIBE = 'https://www.twitch.tv/products/go1den'
     TWITCH_MY_WEBSITE = 'https://www.go1den.com'

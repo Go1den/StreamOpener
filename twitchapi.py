@@ -12,6 +12,7 @@ from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
 from sanitize import sanitize
 from stream import Stream
+from tag import Tag
 
 def authorize() -> str:
     oauthURL = URLConstants.TWITCH_OAUTH + "?&scope=" + MiscConstants.SCOPES + "&response_type=" + MiscConstants.RESPONSE_TYPE + "&client_id=" + MiscConstants.CLIENT_ID + "&redirect_uri=" + URLConstants.REDIRECT_URI
@@ -97,6 +98,22 @@ def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
         except KeyError:
             moreStreams = False
     return usersFollowedStreams
+
+def getAllTwitchTags(oAuth):
+    headers = getAuthorizedHeader(oAuth)
+    params = {}
+    moreTags = True
+    tags = []
+    while moreTags:
+        response = requests.get(URLConstants.TWITCH_ALL_TAGS, headers=headers, params=params)
+        jsonTags = json.loads(response.text)
+        for tag in jsonTags["data"]:
+            tags.append(Tag(tag))
+        try:
+            params["after"] = jsonTags["pagination"]["cursor"]
+        except KeyError:
+            moreTags = False
+    return tags
 
 def isRecognizedTwitchGame(oAuth, game) -> bool:
     headers = getAuthorizedHeader(oAuth)
