@@ -1,5 +1,5 @@
 import io
-from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW
+from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END
 from urllib.request import urlopen
 
 from PIL import ImageTk, Image
@@ -10,10 +10,11 @@ from constants.miscConstants import MiscConstants
 from stream import Stream
 
 class StreamFrame:
-    def __init__(self, stream: Stream, window, scrollWindow):
+    def __init__(self, stream: Stream, window, scrollWindow, searchFrame):
         self.frame = Frame(scrollWindow, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=3)
         self.stream = stream
         self.parent = window
+        self.searchFrame = searchFrame
 
         self.previewFrame = Frame(self.frame)
         self.boxFrame = Frame(self.frame)
@@ -110,5 +111,8 @@ class StreamFrame:
     def onClick(self, event):
         if self.frame.cget("highlightbackground") == "red":
             self.frame.config(highlightbackground="grey", highlightcolor="grey")
+            idx = self.searchFrame.selectedStreamsListbox.get(0, END).index(self.stream.streamName)
+            self.searchFrame.selectedStreamsListbox.delete(idx)
         else:
             self.frame.config(highlightbackground="red", highlightcolor="red")
+            self.searchFrame.selectedStreamsListbox.insert(END, self.stream.streamName)

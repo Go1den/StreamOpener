@@ -25,7 +25,8 @@ class MainWindow2:
         self.tags = getAllTwitchTags(self.credentials.oauth)
 
         self.windowFrame = Frame(self.window)
-        self.scrollableFrame = ScrollableFrame(1010, 680, self.windowFrame)
+        self.searchFrame = SearchFrame(self)
+        self.scrollableFrame = ScrollableFrame(1010, 680, self.searchFrame, self.windowFrame)
         self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
 
         self.singleSelectMode = BooleanVar()
@@ -34,7 +35,7 @@ class MainWindow2:
         self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
 
-        self.searchFrame = SearchFrame(self)
+
 
         self.initializeWindow()
         self.gridFrames()

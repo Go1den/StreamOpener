@@ -6,12 +6,13 @@ from constants.fileConstants import FileConstants
 from frames.streamFrame import StreamFrame
 
 class ScrollableFrame(ttk.Frame):
-    def __init__(self, width, height, container, *args, **kwargs):
+    def __init__(self, width, height, searchFrame, container, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
         self.canvas = Canvas(self)
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = ttk.Frame(self.canvas)
         self.streamFrames = []
+        self.searchFrame = searchFrame
         self.windowFrame = container
         self.currentRow = 0
         self.currentColumn = 0
@@ -37,7 +38,7 @@ class ScrollableFrame(ttk.Frame):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def addStreamFrame(self, stream):
-        streamFrame = StreamFrame(stream, self.windowFrame.master, self.scrollable_frame)
+        streamFrame = StreamFrame(stream, self.windowFrame.master, self.scrollable_frame, self.searchFrame)
         streamFrame.frame.grid(row=self.currentRow, column=self.currentColumn, sticky=NSEW, padx=4, pady=4)
         self.streamFrames.append(streamFrame)
         self.currentColumn += 1
