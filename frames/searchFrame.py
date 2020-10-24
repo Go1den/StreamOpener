@@ -1,8 +1,12 @@
+import webbrowser
 from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, GROOVE, END
 from tkinter.ttk import Combobox
 
 from constants.labelConstants import LabelConstants
+from constants.messageConstants import MessageConstants
+from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
+from fileHandler import writeSettings
 
 class SearchFrame:
     def __init__(self, parent):
@@ -68,13 +72,15 @@ class SearchFrame:
         self.appliedFiltersListbox.configure(exportselection=False)
 
     def populateTwitchTagsListbox(self):
-        for tag in list(map(lambda x: x.localizationNames['en-us'], self.parent.tags)):
+        self.appliedFiltersListbox.delete(0, END)
+        activeTags = [tag for tag in self.parent.tags if tag.isActive]
+        for tag in list(map(lambda x: x.localizationNames['en-us'], activeTags)):
             self.appliedFiltersListbox.insert(END, tag)
 
     def populateButtonFrame(self):
-        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.CLEAR_ALL, width=13, command=lambda: self.removeSelected())
+        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.CLEAR_ALL, width=13, command=lambda: self.clearAll())
         self.buttonRemove.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.APPLY_TAGS, width=13, command=lambda: self.reset())
+        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.APPLY_TAGS, width=13, command=lambda: self.applyTags())
         self.buttonReset.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def populateSelectedStreamsFrame(self):
@@ -101,14 +107,35 @@ class SearchFrame:
     def addFilter(self):
         messagebox.showinfo("Ok", "Filter added.")
 
-    def removeSelected(self):
-        messagebox.showinfo("Ok", "Filters removed.")
+    def clearAll(self):
+        self.appliedFiltersListbox.selection_clear(0, END)
 
-    def reset(self):
+    def applyTags(self):
         messagebox.showinfo("Ok", "Reset")
 
-    def updateURLSetting(self):
-        messagebox.showinfo("Ok", "URL updated.")
+    def updateURLSetting(self, event=None):
+        self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()
+        writeSettings(self.parent.settings)
 
     def openURL(self):
-        messagebox.showinfo("Ok", "URL opened.")
+        finalURL = URLConstants.ORDERED_STREAMING_SITES.get(self.siteDropdown.get())
+        isRareDrop = finalURL == URLConstants.RAREDROP
+        watchingSingleStreamOnTwitch = False
+        if len(self.selectedStreamsListbox.get(0, END)) == 1 and finalURL != URLConstants.TWITCH and messagebox.askyesno(LabelConstants.TWITCH, MessageConstants.WATCH_ON_TWITCH):
+            finalURL = URLConstants.TWITCH
+            watchingSingleStreamOnTwitch = True
+        if not watchingSingleStreamOnTwitch and not self.siteDropdown.get():
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_SITE_SELECTED)
+        elif len(self.selectedStreamsListbox.get(0, END)) > 0:
+            if finalURL == URLConstants.TWITCH:
+                for stream in self.selectedStreamsListbox.get(0, END):
+                    webbrowser.open(finalURL + stream, new=2)
+            else:
+                for stream in self.selectedStreamsListbox.get(0, END):
+                    if isRareDrop:
+                        finalURL += "t" + stream + "/"
+                    else:
+                        finalURL += stream + "/"
+                webbrowser.open(finalURL, new=2)
+        else:
+            messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_STREAMS_SELECTED)

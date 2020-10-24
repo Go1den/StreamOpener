@@ -53,9 +53,9 @@ class StreamFrame:
 
     def setStringVars(self):
         if len(self.stream.streamTitle) > 50:
-            self.previewTitle.set(self.stream.streamTitle[:50] + "...")
+            self.previewTitle.set(self.stream.streamTitle[:50].encode("ascii", "ignore").decode() + "...")
         else:
-            self.previewTitle.set(self.stream.streamTitle)
+            self.previewTitle.set(self.stream.streamTitle.encode("ascii", "ignore").decode())
         if self.stream.boxArtURL:
             self.boxArtImage = self.getImageFromURL(self.stream.boxArtURL, ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART)))
         else:
@@ -90,15 +90,15 @@ class StreamFrame:
 
     def addFilterFrame(self):
         labelFilter = Label(self.filterFrame, text=LabelConstants.FILTER, anchor=W)
-        labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4, 2), pady=(4, 0))
+        labelFilter.grid(row=0, column=0, sticky=NSEW, padx=(4, 2))
         self.buttonFilterStreamer = Button(self.filterFrame, text=LabelConstants.FILTER_STREAMER, width=10,
                                            command=lambda: self.parent.addFilter(self.stream.stylizedStreamName, None))
-        self.buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=(2, 4), pady=4)
+        self.buttonFilterStreamer.grid(row=0, column=1, sticky=NSEW, padx=(2, 4), pady=(0, 4))
         self.buttonFilterGame = Button(self.filterFrame, text=LabelConstants.FILTER_GAME, width=10, command=lambda: self.parent.addFilter(None, self.stream.gameTitle))
-        self.buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=4)
+        self.buttonFilterGame.grid(row=0, column=2, sticky=NSEW, padx=4, pady=(0, 4))
         self.buttonFilterCombined = Button(self.filterFrame, text=LabelConstants.FILTER_COMBO, width=13,
                                            command=lambda: self.parent.addFilter(self.stream.stylizedStreamName, self.stream.gameTitle))
-        self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=(4,0), pady=4)
+        self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=(4, 0), pady=(0, 4))
 
     def getImageFromURL(self, url, defaultImage) -> ImageTk.PhotoImage:
         try:

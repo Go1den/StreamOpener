@@ -43,6 +43,8 @@ def readSettings():
     except FileNotFoundError:
         return populateMissingSettings({"settings": {}})
 
+# TODO add remove unused settings method
+
 def populateMissingSettings(settings) -> dict:
     if MiscConstants.KEY_OPEN_STREAMS_ON not in settings["settings"]:
         settings["settings"][MiscConstants.KEY_OPEN_STREAMS_ON] = LabelConstants.URL_TWITCH

@@ -1,4 +1,9 @@
 class LabelConstants:
+    EXTENDED_MODE = "Shift-Click, Ctrl-Click, and Left Mouse dragging are enabled on this screen."
+    UPDATE_IN_PROGRESS = "Updating"
+    UPDATE_TAGS = "Update Twitch Tag Library"
+    INACTIVE_TAGS = "Inactive Tags:"
+    ACTIVE_TAGS = "Active Tags:"
     HIDE_BOXART = "Hide Box Art"
     SETTINGS_TAG_WINDOW = "Tags..."
     APPLY_TAGS = "Apply Tags"
@@ -72,6 +77,7 @@ class LabelConstants:
     FILTER_COMBO = "Streamer+Game"
     SETTINGS_FILTER_WINDOW = "Filters..."
     FILTER_WINDOW = "Manage Filters"
+    TAG_WINDOW = "Manage Tags"
     FILTER_GAME_LISTBOX = "Game Filters:"
     FILTER_STREAMER_LISTBOX = "Stream Filters:"
     FILTER_COMBINED_LISTBOX = "Specific Filters:"

@@ -1,6 +1,7 @@
 import json
 import sys
 import webbrowser
+from json import JSONDecodeError
 from typing import List
 
 import easygui
@@ -99,21 +100,44 @@ def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
             moreStreams = False
     return usersFollowedStreams
 
-def getAllTwitchTags(oAuth):
+def updateTwitchTags(oAuth, existingTags: List[Tag], isWritingToFile: bool) -> List[Tag]:
     headers = getAuthorizedHeader(oAuth)
     params = {}
     moreTags = True
-    tags = []
+    tags = existingTags
     while moreTags:
         response = requests.get(URLConstants.TWITCH_ALL_TAGS, headers=headers, params=params)
         jsonTags = json.loads(response.text)
         for tag in jsonTags["data"]:
-            tags.append(Tag(tag))
+            if tag["tag_id"] not in [t.id for t in tags]:
+                tags.append(Tag(tag))
         try:
             params["after"] = jsonTags["pagination"]["cursor"]
         except KeyError:
             moreTags = False
+    if isWritingToFile:
+        writeTags(tags)
     return sorted(tags, key=lambda x: x.localizationNames["en-us"].casefold())
+
+def readTags(oAuth) -> List[Tag]:
+    try:
+        with open(FileConstants.TAGS, "r") as f:
+            tagsJson = f.read()
+        tags = json.loads(tagsJson)
+        print("File found. Using tags from existing file.")
+        tagList = [Tag(None, t["id"], t["isAuto"], t["localizationNames"], t["isActive"]) for t in tags]
+        return sorted(tagList, key=lambda x: x.localizationNames["en-us"].casefold())
+    except JSONDecodeError:
+        print("JSON decode error. Updating tags.")
+        return updateTwitchTags(oAuth, [], True)
+    except FileNotFoundError:
+        print("No file found. Updating tags.")
+        return updateTwitchTags(oAuth, [], True)
+
+def writeTags(tags: List[Tag]):
+    j = json.dumps([tag.__dict__ for tag in tags], indent=2)
+    with open(FileConstants.TAGS, "w") as f:
+        f.write(j)
 
 def isRecognizedTwitchGame(oAuth, game) -> bool:
     headers = getAuthorizedHeader(oAuth)

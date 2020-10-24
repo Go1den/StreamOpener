@@ -12,8 +12,5 @@ else:
 
 credentials = Credentials(oAuth)
 
-# Experimental
-w = MainWindow2(credentials)
-
-# w = MainWindow(credentials)
-w.window.mainloop()
+mainWindow = MainWindow2(credentials)
+mainWindow.window.mainloop()

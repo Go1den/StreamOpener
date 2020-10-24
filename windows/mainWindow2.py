@@ -1,5 +1,6 @@
 import sys
 import webbrowser
+from copy import deepcopy
 from tkinter import Tk, NSEW, Frame, Menu, BooleanVar
 
 from constants.fileConstants import FileConstants
@@ -9,9 +10,10 @@ from constants.urlConstants import URLConstants
 from fileHandler import writeSettings, readSettings, readTeams
 from frames.scrollableFrame import ScrollableFrame
 from frames.searchFrame import SearchFrame
-from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, getAllTwitchTags
+from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, readTags, writeTags
 from windows.aboutWindow import AboutWindow
 from windows.filterWindow import FilterWindow
+from windows.tagWindow import TagWindow
 from windows.teamWindow import TeamWindow
 
 class MainWindow2:
@@ -22,7 +24,7 @@ class MainWindow2:
         self.settings = readSettings()
         self.followedStreams = getAllStreamsUserFollows(self.credentials.oauth, self.credentials.user_id)
         self.teams = readTeams(self.followedStreams)
-        self.tags = getAllTwitchTags(self.credentials.oauth)
+        self.tags = readTags(self.credentials.oauth)
 
         self.windowFrame = Frame(self.window)
         self.searchFrame = SearchFrame(self)
@@ -35,19 +37,18 @@ class MainWindow2:
         self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
 
-
-
         self.initializeWindow()
         self.gridFrames()
         self.addMenu()
         self.applySettings()
+        self.window.update()
         self.window.deiconify()
 
     def gridFrames(self):
         for stream in self.liveStreams:
             self.scrollableFrame.addStreamFrame(stream)
         self.searchFrame.frame.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.scrollableFrame.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+        self.scrollableFrame.grid(row=0, column=1, sticky=NSEW, padx=4)
         self.windowFrame.grid()
 
     def addMenu(self):
@@ -60,7 +61,7 @@ class MainWindow2:
         manageMenu = Menu(menu, tearoff=0)
         manageMenu.add_command(label=LabelConstants.SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
         manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
-        manageMenu.add_command(label=LabelConstants.SETTINGS_TAG_WINDOW)
+        manageMenu.add_command(label=LabelConstants.SETTINGS_TAG_WINDOW, command=lambda: TagWindow(self))
         menu.add_cascade(label=LabelConstants.EDIT, menu=manageMenu)
 
         settingsMenu = Menu(menu, tearoff=0)
@@ -105,7 +106,6 @@ class MainWindow2:
         self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART] = self.hideBoxArt.get()
         writeSettings(self.settings)
 
-
     def applySettings(self):
         # refresh = False
         # if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.SETTINGS_JSON]:
@@ -137,3 +137,8 @@ class MainWindow2:
         #     refresh = True
         # if refresh:
         #     self.refresh()
+
+    def setTags(self, tags):
+        self.tags = deepcopy(tags)
+        self.searchFrame.populateTwitchTagsListbox()
+        writeTags(self.tags)
