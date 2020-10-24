@@ -1,5 +1,5 @@
 class MessageConstants:
-    UPDATING_TWITCH_TAGS = "Please wait."
+    UPDATING_TWITCH_TAGS = "Please wait. This window will close automatically."
     WATCH_ON_TWITCH = "Only one stream was selected. Would you like to watch on Twitch instead of your selected site?"
     NO_SITE_SELECTED = "No website selected."
     NO_STREAMS_SELECTED = "No streams selected."
@@ -14,3 +14,4 @@ class MessageConstants:
     NO_FILTER_INFO_PROVIDED = "At least one field is required to create a filter."
     INVALID_GAME = "Game not recognized by Twitch. Please enter the game name exactly as it appears on Twitch."
     ACCESS_TOKEN = "Please enter the access_token from the URL you were redirected to."
+    TAGS_ADDED = "{0} new Twitch tags were found and added to your Tag library."

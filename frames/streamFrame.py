@@ -32,7 +32,6 @@ class StreamFrame:
         self.previewImage = None
         self.boxArtImage = None
         self.previewName = StringVar()
-        self.previewGame = StringVar()
         self.previewViewers = StringVar()
 
         self.setStringVars()
@@ -52,8 +51,8 @@ class StreamFrame:
         self.setStringVars()
 
     def setStringVars(self):
-        if len(self.stream.streamTitle) > 50:
-            self.previewTitle.set(self.stream.streamTitle[:50].encode("ascii", "ignore").decode() + "...")
+        if len(self.stream.streamTitle) > 45:
+            self.previewTitle.set(self.stream.streamTitle[:45].encode("ascii", "ignore").decode() + "...")
         else:
             self.previewTitle.set(self.stream.streamTitle.encode("ascii", "ignore").decode())
         if self.stream.boxArtURL:
@@ -65,10 +64,6 @@ class StreamFrame:
         else:
             self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
         self.previewName.set(self.stream.stylizedStreamName)
-        if len(self.stream.gameTitle) > 45:
-            self.previewGame.set(LabelConstants.GAME + self.stream.gameTitle[:45] + "...")
-        else:
-            self.previewGame.set(LabelConstants.GAME + self.stream.gameTitle)
         self.previewViewers.set(self.stream.viewerCount + LabelConstants.VIEWERS)
 
     def addPreview(self):

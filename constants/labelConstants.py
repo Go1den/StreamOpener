@@ -1,4 +1,5 @@
 class LabelConstants:
+    UPDATE_COMPLETE = "Update Successful"
     EXTENDED_MODE = "Shift-Click, Ctrl-Click, and Left Mouse dragging are enabled on this screen."
     UPDATE_IN_PROGRESS = "Updating"
     UPDATE_TAGS = "Update Twitch Tag Library"

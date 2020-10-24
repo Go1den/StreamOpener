@@ -20,8 +20,9 @@ class SearchFrame:
         self.appliedFilterFrame = Frame(self.frame)
         self.appliedFilterButtonFrame = Frame(self.frame)
         self.selectedStreamsFrame = Frame(self.frame)
-        self.urlFrame = Frame(self.frame)
         self.streamButtonFrame = Frame(self.frame)
+        self.urlFrame = Frame(self.frame)
+        self.streamStartButtonFrame = Frame(self.frame)
 
         self.comboboxTeam = None
         self.buttonTeam = None
@@ -31,6 +32,8 @@ class SearchFrame:
         self.buttonRemove = None
         self.buttonReset = None
         self.selectedStreamsListbox = None
+        self.buttonClearAllStreams = None
+        self.buttonRemoveSelectedStreams = None
         self.siteDropdown = None
         self.buttonOk = None
 
@@ -40,16 +43,18 @@ class SearchFrame:
         self.populateAppliedFilterFrame()
         self.populateButtonFrame()
         self.populateSelectedStreamsFrame()
-        self.populateUrlFrame()
         self.populateStreamButtonFrame()
+        self.populateUrlFrame()
+        self.populateStreamStartButtonFrame()
 
     def gridFrames(self):
         self.filterFrame.grid(row=0, sticky=NSEW)
         self.appliedFilterFrame.grid(row=1, sticky=NSEW)
         self.appliedFilterButtonFrame.grid(row=2, sticky=NSEW)
         self.selectedStreamsFrame.grid(row=3, sticky=NSEW)
-        self.urlFrame.grid(row=4, sticky=NSEW)
-        self.streamButtonFrame.grid(row=5, sticky=NSEW)
+        self.streamButtonFrame.grid(row=4, sticky=NSEW)
+        self.urlFrame.grid(row=5, sticky=NSEW)
+        self.streamStartButtonFrame.grid(row=6, sticky=NSEW)
 
     def populateFilterFrame(self):
         labelFilters = Label(self.filterFrame, text=LabelConstants.FILTERS)
@@ -78,7 +83,7 @@ class SearchFrame:
             self.appliedFiltersListbox.insert(END, tag)
 
     def populateButtonFrame(self):
-        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.CLEAR_ALL, width=13, command=lambda: self.clearAll())
+        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.RESET, width=13, command=lambda: self.clearAllTags())
         self.buttonRemove.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.APPLY_TAGS, width=13, command=lambda: self.applyTags())
         self.buttonReset.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
@@ -93,6 +98,12 @@ class SearchFrame:
         self.selectedStreamsListbox.grid(row=1, column=0, sticky=NSEW, padx=(4, 0))
         self.selectedStreamsListbox.configure(exportselection=False)
 
+    def populateStreamButtonFrame(self):
+        self.buttonClearAllStreams = Button(self.streamButtonFrame, text=LabelConstants.RESET, width=13, command=lambda: self.resetStreams())
+        self.buttonClearAllStreams.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
+        self.buttonRemoveSelectedStreams = Button(self.streamButtonFrame, text=LabelConstants.REMOVE, width=13, command=lambda: self.removeStreams())
+        self.buttonRemoveSelectedStreams.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
+
     def populateUrlFrame(self):
         labelSiteDropdown = Label(self.urlFrame, text=LabelConstants.STREAM_DROPDOWN)
         labelSiteDropdown.grid(row=0, column=0, sticky=W, padx=4, pady=4)
@@ -100,15 +111,24 @@ class SearchFrame:
         self.siteDropdown.bind("<<ComboboxSelected>>", self.updateURLSetting)
         self.siteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
 
-    def populateStreamButtonFrame(self):
-        self.buttonOk = Button(self.streamButtonFrame, text=LabelConstants.OPEN_STREAMS, width=30, command=lambda: self.openURL())
+    def populateStreamStartButtonFrame(self):
+        self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=30, command=lambda: self.openURL())
         self.buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=25)
 
     def addFilter(self):
         messagebox.showinfo("Ok", "Filter added.")
 
-    def clearAll(self):
+    def clearAllTags(self):
         self.appliedFiltersListbox.selection_clear(0, END)
+
+    def resetStreams(self):
+        self.selectedStreamsListbox.delete(0, END)
+        self.parent.scrollableFrame.updateStreamFrameBorders([])
+
+    def removeStreams(self):
+        for idx in reversed(self.selectedStreamsListbox.curselection()):
+            self.selectedStreamsListbox.delete(idx)
+        self.parent.scrollableFrame.updateStreamFrameBorders(self.selectedStreamsListbox.get(0, END))
 
     def applyTags(self):
         messagebox.showinfo("Ok", "Reset")

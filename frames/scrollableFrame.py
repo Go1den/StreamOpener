@@ -59,3 +59,9 @@ class ScrollableFrame(ttk.Frame):
                 streamFrame.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
             else:
                 streamFrame.labelBoxArt.grid_forget()
+
+    def updateStreamFrameBorders(self, selectedStreams):
+        for streamFrame in self.streamFrames:
+            if streamFrame.stream.streamName not in selectedStreams:
+                streamFrame.frame.config(highlightbackground="grey", highlightcolor="grey")
+
