@@ -1,13 +1,14 @@
 import sys
 import webbrowser
 from copy import deepcopy
-from tkinter import Tk, NSEW, Frame, Menu, BooleanVar
+from tkinter import Tk, NSEW, Frame, Menu, BooleanVar, StringVar, messagebox
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
+from constants.messageConstants import MessageConstants
 from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
-from fileHandler import writeSettings, readSettings, readTeams
+from fileHandler import writeSettings, readSettings, readTeams, readFilters, writeFilters, writeTeams
 from frames.scrollableFrame import ScrollableFrame
 from frames.searchFrame import SearchFrame
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, readTags, writeTags
@@ -28,14 +29,16 @@ class MainWindow2:
 
         self.windowFrame = Frame(self.window)
         self.searchFrame = SearchFrame(self)
-        self.scrollableFrame = ScrollableFrame(1010, 680, self.searchFrame, self.windowFrame)
-        self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
 
         self.singleSelectMode = BooleanVar()
         self.multipleSelectMode = BooleanVar()
         self.hideThumbnail = BooleanVar()
         self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
+
+        self.scrollableFrame = ScrollableFrame(1010, 680, self)
+        self.searchFrame.comboboxTeam.bind("<<ComboboxSelected>>", self.scrollableFrame.refresh)
+        self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
 
         self.initializeWindow()
         self.gridFrames()
@@ -45,8 +48,6 @@ class MainWindow2:
         self.window.deiconify()
 
     def gridFrames(self):
-        for stream in self.liveStreams:
-            self.scrollableFrame.addStreamFrame(stream)
         self.searchFrame.frame.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
         self.scrollableFrame.grid(row=0, column=1, sticky=NSEW, padx=4)
         self.windowFrame.grid()
@@ -60,7 +61,7 @@ class MainWindow2:
 
         manageMenu = Menu(menu, tearoff=0)
         manageMenu.add_command(label=LabelConstants.SETTINGS_TEAM_WINDOW, command=lambda: TeamWindow(self, self.teams))
-        manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self))
+        manageMenu.add_command(label=LabelConstants.SETTINGS_FILTER_WINDOW, command=lambda: FilterWindow(self, self.scrollableFrame.filters))
         manageMenu.add_command(label=LabelConstants.SETTINGS_TAG_WINDOW, command=lambda: TagWindow(self))
         menu.add_cascade(label=LabelConstants.EDIT, menu=manageMenu)
 
@@ -107,38 +108,29 @@ class MainWindow2:
         writeSettings(self.settings)
 
     def applySettings(self):
-        # refresh = False
-        # if MiscConstants.KEY_FILTERS in self.settings[LabelConstants.SETTINGS_JSON]:
-        #     self.enableFilters.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_FILTERS])
-        #     refresh = True
-        # if MiscConstants.KEY_SELECTION_MODE in self.settings[LabelConstants.SETTINGS_JSON]:
-        #     selectionMode = self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE]
-        #     self.setSelectionModes(selectionMode == MULTIPLE, self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_SELECTION_MODE])
-        # else:
-        #     self.setSelectionModes(False, SINGLE)
         if MiscConstants.KEY_HIDE_THUMBNAIL in self.settings[LabelConstants.SETTINGS_JSON]:
             self.hideThumbnail.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
-            # self.toggleThumbnail()
         else:
             self.hideThumbnail.set(False)
         self.scrollableFrame.showThumbnails(not self.hideThumbnail.get())
-
         if MiscConstants.KEY_HIDE_BOXART in self.settings[LabelConstants.SETTINGS_JSON]:
             self.hideBoxArt.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART])
         else:
             self.hideBoxArt.set(False)
         self.scrollableFrame.showBoxArt(not self.hideBoxArt.get())
-        # if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
-        #     self.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
-        # else:
-        #     self.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH])
-        # if MiscConstants.KEY_TEAM in self.settings[LabelConstants.SETTINGS_JSON] and self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
-        #     self.teamDropdown.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
-        #     refresh = True
-        # if refresh:
-        #     self.refresh()
+        if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.searchFrame.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
+        else:
+            self.searchFrame.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH])
+        if MiscConstants.KEY_TEAM in self.settings[LabelConstants.SETTINGS_JSON] and self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
+            self.searchFrame.currentTeam.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
 
     def setTags(self, tags):
         self.tags = deepcopy(tags)
         self.searchFrame.populateTwitchTagsListbox()
         writeTags(self.tags)
+
+    def setTeams(self, teams):
+        self.teams = teams
+        writeTeams(self.teams)
+        self.searchFrame.updateComboboxTeam()

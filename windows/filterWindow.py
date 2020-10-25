@@ -7,11 +7,11 @@ from windows.newFilterWindow import NewFilterWindow
 from windows.windowHelper import WindowHelper
 
 class FilterWindow:
-    def __init__(self, parent):
+    def __init__(self, parent, filters):
         self.window = Toplevel(parent.window)
         self.window.withdraw()
         self.parent = parent
-        self.filters = deepcopy(parent.filters)
+        self.filters = deepcopy(filters)
         self.filterFrame = Frame(self.window)
         self.buttonFrame = Frame(self.window)
 
@@ -95,7 +95,7 @@ class FilterWindow:
         self.filters["filters"][key] = [x for x in self.filters["filters"][key] if x["description"] not in descriptions]
 
     def ok(self):
-        self.parent.setFilters(self.filters)
+        self.parent.scrollableFrame.setFilters(self.filters)
         self.window.destroy()
 
     def addFilter(self, key: str, newFilter: dict):

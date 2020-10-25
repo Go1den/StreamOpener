@@ -63,6 +63,7 @@ class SearchFrame:
         labelTeam = Label(self.filterFrame, text=LabelConstants.SEARCH_TEAMS)
         labelTeam.grid(row=1, column=0, sticky=W, columnspan=2, padx=4, pady=4)
         self.comboboxTeam = Combobox(self.filterFrame, textvariable=self.currentTeam, values=list(self.parent.teams.keys()), state="readonly", width=32)
+        self.comboboxTeam.current(0)
         self.comboboxTeam.grid(row=2, column=0, columnspan=2, padx=4, pady=4)
 
     def populateAppliedFilterFrame(self):
@@ -159,3 +160,8 @@ class SearchFrame:
                 webbrowser.open(finalURL, new=2)
         else:
             messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_STREAMS_SELECTED)
+
+    def updateComboboxTeam(self):
+        self.comboboxTeam.configure(values=list(self.parent.teams.keys()))
+        self.comboboxTeam.current(0)
+        self.parent.scrollableFrame.refresh()
