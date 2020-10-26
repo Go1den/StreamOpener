@@ -68,7 +68,7 @@ class MainWindow2:
         settingsMenu = Menu(menu, tearoff=0)
         settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail())
         settingsMenu.add_checkbutton(label=LabelConstants.HIDE_BOXART, variable=self.hideBoxArt, command=lambda: self.toggleBoxArt())
-        settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.enableFilters, command=lambda: self.toggleFilters())
+        settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.scrollableFrame.enableFilters, command=lambda: self.scrollableFrame.toggleFilters())
         menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)

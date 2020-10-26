@@ -56,7 +56,7 @@ class ScrollableFrame(ttk.Frame):
 
     def addStreamFrame(self, stream):
         color = "red" if stream.streamName in self.parent.searchFrame.selectedStreamsListbox.get(0, END) else "grey"
-        streamFrame = StreamFrame(stream, self.windowFrame.master, self.scrollable_frame, self.searchFrame, color)
+        streamFrame = StreamFrame(stream, self, self.scrollable_frame, self.searchFrame, color)
         streamFrame.frame.grid(row=self.currentRow, column=self.currentColumn, sticky=NSEW, padx=4, pady=4)
         self.streamFrames.append(streamFrame)
         self.currentColumn += 1
@@ -104,6 +104,8 @@ class ScrollableFrame(ttk.Frame):
                 self.filters["filters"][filterCategory].append(newFilter)
                 writeFilters(self.filters)
                 messagebox.showinfo(LabelConstants.INFO, MessageConstants.FILTER_ADDED.format(newFilter["description"]))
+                if self.enableFilters.get():
+                    self.refresh()
             else:
                 messagebox.showerror(LabelConstants.ERROR, MessageConstants.FILTER_ALREADY_EXISTS)
 

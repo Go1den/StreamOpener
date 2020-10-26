@@ -10,10 +10,10 @@ from constants.miscConstants import MiscConstants
 from stream import Stream
 
 class StreamFrame:
-    def __init__(self, stream: Stream, window, scrollWindow, searchFrame, color):
+    def __init__(self, stream: Stream, parent, scrollWindow, searchFrame, color):
         self.frame = Frame(scrollWindow, relief=GROOVE, highlightbackground=color, highlightcolor=color, highlightthickness=3)
         self.stream = stream
-        self.parent = window
+        self.parent = parent
         self.searchFrame = searchFrame
 
         self.previewFrame = Frame(self.frame)
