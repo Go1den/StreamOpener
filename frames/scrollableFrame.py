@@ -112,8 +112,6 @@ class ScrollableFrame(ttk.Frame):
     def setFilters(self, newFilters):
         self.filters = newFilters
         writeFilters(self.filters)
-        if self.enableFilters.get():
-            self.refresh()
 
     def isFiltered(self, stream):
         if self.enableFilters.get():
@@ -130,6 +128,8 @@ class ScrollableFrame(ttk.Frame):
         self.refresh()
 
     def refresh(self, event=None):
+        for tag in self.parent.searchFrame.getAllSelectedTags():
+            print(tag.id)
         self.parent.followedStreams = getAllStreamsUserFollows(self.parent.credentials.oauth, self.parent.credentials.user_id)
         self.parent.teams = readTeams(self.parent.followedStreams)
         refreshStreams = getLiveFollowedStreams(self.parent.credentials.oauth, [self.parent.followedStreams[i:i + 100] for i in range(0, len(self.parent.followedStreams), 100)])
@@ -139,7 +139,9 @@ class ScrollableFrame(ttk.Frame):
             if not stream.isLive(refreshStreams):
                 self.parent.searchFrame.selectedStreamsListbox.delete(self.parent.searchFrame.selectedStreamsListbox.get(0, END).index(streamName))
         currentTeamMembers = [streamName for streamName in self.parent.teams[self.parent.searchFrame.currentTeam.get()]]
-        tmpLiveList = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers]
+        tmpLiveList = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
+        for stream in tmpLiveList:
+            print(stream.tagIDs)
         self.parent.liveStreams = refreshStreams
         self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] = self.parent.searchFrame.comboboxTeam.get()
         writeSettings(self.parent.settings)

@@ -1,28 +1,33 @@
 import webbrowser
 from tkinter import Frame, Label, Button, messagebox, W, Listbox, Scrollbar, MULTIPLE, NONE, NSEW, StringVar, GROOVE, END
 from tkinter.ttk import Combobox
+from typing import List
 
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants
 from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
 from fileHandler import writeSettings
+from tag import Tag
 
 class SearchFrame:
     def __init__(self, parent):
         self.parent = parent
-        self.frame = Frame(self.parent.windowFrame, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
+        self.topFrame = Frame(self.parent.windowFrame, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
+        self.middleFrame = Frame(self.parent.windowFrame, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
+        self.bottomFrame = Frame(self.parent.windowFrame, relief=GROOVE, highlightbackground="grey", highlightcolor="grey", highlightthickness=1)
+        self.bottomestFrame = Frame(self.parent.windowFrame)
 
         self.site = StringVar()
         self.currentTeam = StringVar()
 
-        self.filterFrame = Frame(self.frame)
-        self.appliedFilterFrame = Frame(self.frame)
-        self.appliedFilterButtonFrame = Frame(self.frame)
-        self.selectedStreamsFrame = Frame(self.frame)
-        self.streamButtonFrame = Frame(self.frame)
-        self.urlFrame = Frame(self.frame)
-        self.streamStartButtonFrame = Frame(self.frame)
+        self.filterFrame = Frame(self.topFrame)
+        self.appliedFilterFrame = Frame(self.topFrame)
+        self.appliedFilterButtonFrame = Frame(self.topFrame)
+        self.selectedStreamsFrame = Frame(self.middleFrame)
+        self.streamButtonFrame = Frame(self.middleFrame)
+        self.urlFrame = Frame(self.bottomFrame)
+        self.streamStartButtonFrame = Frame(self.bottomestFrame)
 
         self.comboboxTeam = None
         self.buttonTeam = None
@@ -51,10 +56,10 @@ class SearchFrame:
         self.filterFrame.grid(row=0, sticky=NSEW)
         self.appliedFilterFrame.grid(row=1, sticky=NSEW)
         self.appliedFilterButtonFrame.grid(row=2, sticky=NSEW)
-        self.selectedStreamsFrame.grid(row=3, sticky=NSEW)
-        self.streamButtonFrame.grid(row=4, sticky=NSEW)
-        self.urlFrame.grid(row=5, sticky=NSEW)
-        self.streamStartButtonFrame.grid(row=6, sticky=NSEW)
+        self.selectedStreamsFrame.grid(row=0, sticky=NSEW)
+        self.streamButtonFrame.grid(row=1, sticky=NSEW)
+        self.urlFrame.grid(row=0, sticky=NSEW)
+        self.streamStartButtonFrame.grid(row=0, sticky=NSEW)
 
     def populateFilterFrame(self):
         labelFilters = Label(self.filterFrame, text=LabelConstants.FILTERS)
@@ -84,9 +89,9 @@ class SearchFrame:
             self.appliedFiltersListbox.insert(END, tag)
 
     def populateButtonFrame(self):
-        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.RESET, width=13, command=lambda: self.clearAllTags())
+        self.buttonRemove = Button(self.appliedFilterButtonFrame, text=LabelConstants.RESET, width=10, command=lambda: self.clearAllTags())
         self.buttonRemove.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.APPLY_TAGS, width=13, command=lambda: self.applyTags())
+        self.buttonReset = Button(self.appliedFilterButtonFrame, text=LabelConstants.REFRESH_STREAMS, width=16, command=lambda: self.parent.scrollableFrame.refresh())
         self.buttonReset.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def populateSelectedStreamsFrame(self):
@@ -100,9 +105,9 @@ class SearchFrame:
         self.selectedStreamsListbox.configure(exportselection=False)
 
     def populateStreamButtonFrame(self):
-        self.buttonClearAllStreams = Button(self.streamButtonFrame, text=LabelConstants.RESET, width=13, command=lambda: self.resetStreams())
+        self.buttonClearAllStreams = Button(self.streamButtonFrame, text=LabelConstants.RESET, width=10, command=lambda: self.resetStreams())
         self.buttonClearAllStreams.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.buttonRemoveSelectedStreams = Button(self.streamButtonFrame, text=LabelConstants.REMOVE, width=13, command=lambda: self.removeStreams())
+        self.buttonRemoveSelectedStreams = Button(self.streamButtonFrame, text=LabelConstants.REMOVE, width=16, command=lambda: self.removeStreams())
         self.buttonRemoveSelectedStreams.grid(row=0, column=1, sticky=NSEW, padx=4, pady=4)
 
     def populateUrlFrame(self):
@@ -113,8 +118,8 @@ class SearchFrame:
         self.siteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
 
     def populateStreamStartButtonFrame(self):
-        self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=30, command=lambda: self.openURL())
-        self.buttonOk.grid(row=0, column=0, sticky=NSEW, padx=4, pady=25)
+        self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=32, command=lambda: self.openURL())
+        self.buttonOk.grid(row=0, column=0, sticky=NSEW, pady=4)
 
     def addFilter(self):
         messagebox.showinfo("Ok", "Filter added.")
@@ -164,4 +169,12 @@ class SearchFrame:
     def updateComboboxTeam(self):
         self.comboboxTeam.configure(values=list(self.parent.teams.keys()))
         self.comboboxTeam.current(0)
-        self.parent.scrollableFrame.refresh()
+
+    def getAllSelectedTags(self) -> List[Tag]:
+        tagDict = dict(zip([t.localizationNames["en-us"] for t in self.parent.tags], [tag for tag in self.parent.tags]))
+        selectedTags = []
+        for idx in self.appliedFiltersListbox.curselection():
+            selectedTags.append(tagDict[self.appliedFiltersListbox.get(idx)])
+        return selectedTags
+
+

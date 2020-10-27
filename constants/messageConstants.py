@@ -1,5 +1,5 @@
 class MessageConstants:
-    UPDATING_TWITCH_TAGS = "Please wait. This window will close automatically."
+    UPDATING_TWITCH_TAGS = "Please wait. Retrieving Tags from Twitch..."
     WATCH_ON_TWITCH = "Only one stream was selected. Would you like to watch on Twitch instead of your selected site?"
     NO_SITE_SELECTED = "No website selected."
     NO_STREAMS_SELECTED = "No streams selected."

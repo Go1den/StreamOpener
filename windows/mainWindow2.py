@@ -1,14 +1,13 @@
 import sys
 import webbrowser
 from copy import deepcopy
-from tkinter import Tk, NSEW, Frame, Menu, BooleanVar, StringVar, messagebox
+from tkinter import Tk, NSEW, Frame, Menu, BooleanVar
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
-from constants.messageConstants import MessageConstants
 from constants.miscConstants import MiscConstants
 from constants.urlConstants import URLConstants
-from fileHandler import writeSettings, readSettings, readTeams, readFilters, writeFilters, writeTeams
+from fileHandler import writeSettings, readSettings, readTeams, writeTeams
 from frames.scrollableFrame import ScrollableFrame
 from frames.searchFrame import SearchFrame
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, readTags, writeTags
@@ -37,7 +36,6 @@ class MainWindow2:
         self.enableFilters = BooleanVar()
 
         self.scrollableFrame = ScrollableFrame(1010, 680, self)
-        self.searchFrame.comboboxTeam.bind("<<ComboboxSelected>>", self.scrollableFrame.refresh)
         self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
 
         self.initializeWindow()
@@ -48,8 +46,11 @@ class MainWindow2:
         self.window.deiconify()
 
     def gridFrames(self):
-        self.searchFrame.frame.grid(row=0, column=0, sticky=NSEW, padx=4, pady=4)
-        self.scrollableFrame.grid(row=0, column=1, sticky=NSEW, padx=4)
+        self.searchFrame.topFrame.grid(row=0, column=0, sticky=NSEW, padx=4, pady=6)
+        self.searchFrame.middleFrame.grid(row=1, column=0, sticky=NSEW, padx=4, pady=6)
+        self.searchFrame.bottomFrame.grid(row=2, column=0, sticky=NSEW, padx=4, pady=6)
+        self.searchFrame.bottomestFrame.grid(row=3, column=0, sticky=NSEW, padx=4, pady=8)
+        self.scrollableFrame.grid(row=0, column=1, rowspan=4, sticky=NSEW, padx=4)
         self.windowFrame.grid()
 
     def addMenu(self):

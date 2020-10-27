@@ -20,6 +20,7 @@ class URLConstants:
     MULTITWITCH = "https://multitwitch.tv/"
     TWITCHTHEATER = "https://twitchtheater.tv/"
     RAREDROP = "https://multi.raredrop.co/"
+    SIMULTWITCH = "https://simultwitch.com/"
 
     ORDERED_STREAMING_SITES = OrderedDict()
     ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH] = TWITCH
@@ -27,4 +28,5 @@ class URLConstants:
     ORDERED_STREAMING_SITES[LabelConstants.URL_MULTISTREAM] = MULTISTREAM
     ORDERED_STREAMING_SITES[LabelConstants.URL_MULTITWITCH] = MULTITWITCH
     ORDERED_STREAMING_SITES[LabelConstants.URL_RAREDROP] = RAREDROP
+    ORDERED_STREAMING_SITES[LabelConstants.URL_SIMULTWITCH] = SIMULTWITCH
     ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCHTHEATER] = TWITCHTHEATER
