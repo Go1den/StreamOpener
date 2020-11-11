@@ -12,6 +12,7 @@ from fileHandler import writeFilters, readFilters, writeSettings, readTeams
 from frames.streamFrame import StreamFrame
 from stream import Stream
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, getTopTwitchStreams
+from windows.updatingStreamsWindow import UpdatingStreamsWindow
 
 class ScrollableFrame(ttk.Frame):
     def __init__(self, width, height, parent, *args, **kwargs):
@@ -69,20 +70,26 @@ class ScrollableFrame(ttk.Frame):
             self.currentRow += 1
             self.currentColumn = 0
 
-    def showThumbnails(self, showThumbnails):
+    def showThumbnails(self, showThumbnail):
         for streamFrame in self.streamFrames:
-            if showThumbnails:
-                streamFrame.labelImage.configure(image=streamFrame.previewImage)
-            else:
-                streamFrame.labelImage.configure(image=self.DEFAULT_STREAM_PREVIEW)
+            self.showThumbnail(showThumbnail, streamFrame)
 
-    def showBoxArt(self, showBoxArt):
+    def showThumbnail(self, showThumbnail, streamFrame):
+        if showThumbnail:
+            streamFrame.labelImage.configure(image=streamFrame.previewImage)
+        else:
+            streamFrame.labelImage.configure(image=self.DEFAULT_STREAM_PREVIEW)
+
+    def showBoxArts(self, showBoxArt):
         for streamFrame in self.streamFrames:
-            if showBoxArt:
-                streamFrame.labelBoxArt.configure(image=streamFrame.boxArtImage)
-                streamFrame.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
-            else:
-                streamFrame.labelBoxArt.grid_forget()
+            self.showBoxArt(showBoxArt, streamFrame)
+
+    def showBoxArt(self, showBoxArt, streamFrame):
+        if showBoxArt:
+            streamFrame.labelBoxArt.configure(image=streamFrame.boxArtImage)
+            streamFrame.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
+        else:
+            streamFrame.labelBoxArt.grid_forget()
 
     def updateStreamFrameBorders(self, selectedStreams):
         for streamFrame in self.streamFrames:
@@ -134,7 +141,8 @@ class ScrollableFrame(ttk.Frame):
         self.refresh()
 
     def refresh(self, event=None):
-        print("refresh")
+        if not self.isProgramJustStarting:
+            updatingStreamsWindow = UpdatingStreamsWindow(self.parent)
         if self.parent.searchFrame.currentTeam.get() == LabelConstants.TOP_TWITCH_TEAM:
             self.parent.topTwitchStreams = getTopTwitchStreams(self.parent.credentials)
             filteredStreams = [stream for stream in self.parent.topTwitchStreams if
@@ -157,18 +165,17 @@ class ScrollableFrame(ttk.Frame):
         writeSettings(self.parent.settings)
         self.addStreamFrames(filteredStreams)
         if not self.isProgramJustStarting:
+            updatingStreamsWindow.window.destroy()
             threading.Thread(target=self.loadImagesIntoFrames).start()
         else:
             self.isProgramJustStarting = False
 
     def loadImagesIntoFrames(self):
-        print("Loading images...")
         for streamFrame in self.streamFrames:
             streamFrame.stream.setImagesFromURL()
             streamFrame.previewImage = streamFrame.stream.loadedPreviewImage
             streamFrame.boxArtImage = streamFrame.stream.loadedBoxArtImage
-        self.enforceSettings()
-        print("Load complete!")
+            self.enforceSettings(streamFrame)
 
     def isNotSelected(self, stream, tmpSelectedList) -> bool:
         return stream not in tmpSelectedList
@@ -183,12 +190,12 @@ class ScrollableFrame(ttk.Frame):
         for stream in streams:
             self.addStreamFrame(stream)
 
-    def enforceSettings(self):
+    def enforceSettings(self, streamFrame):
         if self.parent.hideThumbnail.get():
-            self.showThumbnails(False)
+            self.showThumbnail(False, streamFrame)
         else:
-            self.showThumbnails(True)
+            self.showThumbnail(True, streamFrame)
         if self.parent.hideBoxArt.get():
-            self.showBoxArt(False)
+            self.showBoxArt(False, streamFrame)
         else:
-            self.showBoxArt(True)
+            self.showBoxArt(True, streamFrame)

@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END
+from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END, PhotoImage, LEFT, RIGHT
 
 from constants.labelConstants import LabelConstants
 from constants.miscConstants import MiscConstants
@@ -11,7 +11,8 @@ class StreamFrame:
         self.parent = parent
         self.searchFrame = searchFrame
 
-        self.previewFrame = Frame(self.frame)
+        self.previewFrame = Frame(self.frame, width=322, height=182)
+        self.previewFrame.grid_propagate(False)
         self.boxFrame = Frame(self.frame)
         self.boxArtFrame = Frame(self.boxFrame)
         self.boxArtLabelFrame = Frame(self.boxFrame)
@@ -46,10 +47,7 @@ class StreamFrame:
         self.setStringVars()
 
     def setStringVars(self):
-        if len(self.stream.streamTitle) > 45:
-            self.previewTitle.set(self.stream.streamTitle[:45].encode("ascii", "ignore").decode() + "...")
-        else:
-            self.previewTitle.set(self.stream.streamTitle.encode("ascii", "ignore").decode())
+        self.previewTitle.set(self.stream.streamTitle.encode("ascii", "ignore").decode())
         self.boxArtImage = self.stream.DEFAULT_BOX_ART
         self.previewImage = self.stream.DEFAULT_STREAM_PREVIEW
         self.previewName.set(self.stream.stylizedStreamName)
@@ -59,7 +57,10 @@ class StreamFrame:
         self.labelImage = Label(self.previewFrame, image=self.previewImage, bd=1)
         self.labelImage.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         self.labelImage.grid(row=1, sticky=W)
-        labelTitle = Label(self.previewFrame, textvariable=self.previewTitle, fg="white", bg="black")
+        dummyImageToMakeLabelHaveWidthInPixels = PhotoImage(width=1, height=1)
+        dummyLabelToGetWidthOfText = Label(None, textvariable=self.previewTitle)
+        titleWidth = min(dummyLabelToGetWidthOfText.winfo_reqwidth() - 4, 308)
+        labelTitle = Label(self.previewFrame, image=dummyImageToMakeLabelHaveWidthInPixels, textvariable=self.previewTitle, fg="white", bg="black", compound=RIGHT, anchor=W, width=titleWidth)
         labelTitle.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         labelTitle.grid(row=1, sticky=NW, padx=4, pady=4)
         self.labelBoxArt = Label(self.previewFrame, image=self.boxArtImage, bd=1)

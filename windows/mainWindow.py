@@ -105,9 +105,9 @@ class MainWindow:
 
     def toggleBoxArt(self):
         if self.hideBoxArt.get():
-            self.scrollableFrame.showBoxArt(False)
+            self.scrollableFrame.showBoxArts(False)
         else:
-            self.scrollableFrame.showBoxArt(True)
+            self.scrollableFrame.showBoxArts(True)
         self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART] = self.hideBoxArt.get()
         writeSettings(self.settings)
 
@@ -116,12 +116,10 @@ class MainWindow:
             self.hideThumbnail.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
         else:
             self.hideThumbnail.set(False)
-        # self.scrollableFrame.showThumbnails(not self.hideThumbnail.get())
         if MiscConstants.KEY_HIDE_BOXART in self.settings[LabelConstants.SETTINGS_JSON]:
             self.hideBoxArt.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART])
         else:
             self.hideBoxArt.set(False)
-        # self.scrollableFrame.showBoxArt(not self.hideBoxArt.get())
         if MiscConstants.KEY_OPEN_STREAMS_ON in self.settings[LabelConstants.SETTINGS_JSON]:
             self.searchFrame.site.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON])
         else:

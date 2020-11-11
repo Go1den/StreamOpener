@@ -84,7 +84,7 @@ def getLiveFollowedStreams(oAuth: str, streams: List[List[dict]]) -> List[Stream
 def getTopTwitchStreams(credentials) -> List[Stream]:
     headers = getAuthorizedHeader(credentials.oauth)
     params = {
-        "first": 30
+        "first": 99
     }
     topTwitchStreams = []
     response = requests.get(URLConstants.TWITCH_LIVE_FOLLOWED, headers=headers, params=params)
