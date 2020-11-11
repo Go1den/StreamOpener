@@ -1,4 +1,5 @@
 class LabelConstants:
+    TOP_TWITCH_TEAM = "Top Twitch Streams"
     URL_SIMULTWITCH = "SimulTwitch"
     UPDATE_COMPLETE = "Update Successful"
     EXTENDED_MODE = "Shift-Click, Ctrl-Click, and Left Mouse dragging are enabled on this screen."
@@ -62,7 +63,7 @@ class LabelConstants:
     ADD = "Add"
     FILTERS = "Narrow Results By:"
     APPLIED_FILTERS = "Applied Filters:"
-    ALL_TEAM = "All"
+    ALL_TEAM = "My Followed Streams"
     TEAM_NAME_WINDOW = "Team Name"
     TEAM_NAME = "Enter a team name."
     THANKS = "Thank you so much for trying my program!\nIf you enjoy it, please tell others about it."

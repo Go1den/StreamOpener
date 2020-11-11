@@ -1,5 +1,5 @@
 from copy import deepcopy
-from tkinter import Tk, Frame, NSEW, Label, Toplevel, messagebox
+from tkinter import Frame, NSEW, Label, Toplevel, messagebox
 
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants

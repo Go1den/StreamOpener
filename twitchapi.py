@@ -81,10 +81,36 @@ def getLiveFollowedStreams(oAuth: str, streams: List[List[dict]]) -> List[Stream
     liveStreams.sort(key=lambda x: int(x.viewerCount), reverse=True)
     return liveStreams
 
-def getAllStreamsUserFollows(oAuth, user_id) -> List[dict]:
-    headers = getAuthorizedHeader(oAuth)
+def getTopTwitchStreams(credentials) -> List[Stream]:
+    headers = getAuthorizedHeader(credentials.oauth)
     params = {
-        "from_id": user_id,
+        "first": 30
+    }
+    topTwitchStreams = []
+    response = requests.get(URLConstants.TWITCH_LIVE_FOLLOWED, headers=headers, params=params)
+    jsonStreams = json.loads(response.text)
+    if jsonStreams['data'] is not None:
+        gameIDs = []
+        for stream in jsonStreams['data']:
+            gameIDs.append(stream['game_id'])
+        gameIDs = list(set(gameIDs))
+        gameInformation = getGameInformation(credentials.oauth, gameIDs)
+        for stream in jsonStreams['data']:
+            try:
+                game = [game for game in gameInformation['data'] if game['id'] == stream['game_id']][0]
+                gameTitle = game['name']
+                boxArtURL = game['box_art_url'].replace('{width}', '52').replace('{height}', '72')
+            except IndexError:
+                gameTitle = "N/A"
+                boxArtURL = ""
+            gameTitle = sanitize(gameTitle)
+            topTwitchStreams.append(Stream(stream, gameTitle, boxArtURL))
+    return topTwitchStreams
+
+def getAllStreamsUserFollows(credentials) -> List[dict]:
+    headers = getAuthorizedHeader(credentials.oauth)
+    params = {
+        "from_id": credentials.user_id,
         "first": 100
     }
     moreStreams = True
@@ -124,7 +150,6 @@ def readTags(oAuth) -> List[Tag]:
         with open(FileConstants.TAGS, "r") as f:
             tagsJson = f.read()
         tags = json.loads(tagsJson)
-        print("File found. Using tags from existing file.")
         tagList = [Tag(None, t["id"], t["isAuto"], t["localizationNames"], t["isActive"]) for t in tags]
         return sorted(tagList, key=lambda x: x.localizationNames["en-us"].casefold())
     except JSONDecodeError:

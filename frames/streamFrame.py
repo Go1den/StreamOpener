@@ -1,10 +1,5 @@
-import io
 from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END
-from urllib.request import urlopen
 
-from PIL import ImageTk, Image
-
-from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
 from constants.miscConstants import MiscConstants
 from stream import Stream
@@ -55,14 +50,8 @@ class StreamFrame:
             self.previewTitle.set(self.stream.streamTitle[:45].encode("ascii", "ignore").decode() + "...")
         else:
             self.previewTitle.set(self.stream.streamTitle.encode("ascii", "ignore").decode())
-        if self.stream.boxArtURL:
-            self.boxArtImage = self.getImageFromURL(self.stream.boxArtURL, ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART)))
-        else:
-            self.boxArtImage = ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART))
-        if self.stream.previewImage:
-            self.previewImage = self.getImageFromURL(self.stream.previewImage, ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW)))
-        else:
-            self.previewImage = ImageTk.PhotoImage(Image.open(FileConstants.STREAM_PREVIEW))
+        self.boxArtImage = self.stream.DEFAULT_BOX_ART
+        self.previewImage = self.stream.DEFAULT_STREAM_PREVIEW
         self.previewName.set(self.stream.stylizedStreamName)
         self.previewViewers.set(self.stream.viewerCount + LabelConstants.VIEWERS)
 
@@ -94,14 +83,6 @@ class StreamFrame:
         self.buttonFilterCombined = Button(self.filterFrame, text=LabelConstants.FILTER_COMBO, width=13,
                                            command=lambda: self.parent.addFilter(self.stream.stylizedStreamName, self.stream.gameTitle))
         self.buttonFilterCombined.grid(row=0, column=3, sticky=NSEW, padx=(4, 0), pady=(0, 4))
-
-    def getImageFromURL(self, url, defaultImage) -> ImageTk.PhotoImage:
-        try:
-            rawData = urlopen(url).read()
-            im = Image.open(io.BytesIO(rawData))
-            return ImageTk.PhotoImage(im)
-        except ValueError:
-            return defaultImage
 
     def onClick(self, event):
         if self.frame.cget("highlightbackground") == "red":

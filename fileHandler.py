@@ -10,7 +10,8 @@ from constants.miscConstants import MiscConstants
 def readTeams(followedStreams: List[dict]) -> OrderedDict:
     allTeam = [stream["to_name"] for stream in followedStreams]
     result = OrderedDict()
-    result["All"] = sorted(allTeam, key=str.casefold)
+    result[LabelConstants.ALL_TEAM] = allTeam
+    result[LabelConstants.TOP_TWITCH_TEAM] = []
     try:
         with open(FileConstants.TEAMS, "r") as f:
             teamsJson = f.read()

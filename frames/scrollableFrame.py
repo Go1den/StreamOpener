@@ -1,3 +1,4 @@
+import threading
 from tkinter import ttk, NSEW, Canvas, SW, messagebox, BooleanVar, END
 from typing import List
 
@@ -10,7 +11,7 @@ from constants.miscConstants import MiscConstants
 from fileHandler import writeFilters, readFilters, writeSettings, readTeams
 from frames.streamFrame import StreamFrame
 from stream import Stream
-from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams
+from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, getTopTwitchStreams
 
 class ScrollableFrame(ttk.Frame):
     def __init__(self, width, height, parent, *args, **kwargs):
@@ -26,6 +27,10 @@ class ScrollableFrame(ttk.Frame):
         self.currentColumn = 0
         self.filters = readFilters()
         self.enableFilters = BooleanVar()
+
+        self.isProgramJustStarting = True
+
+        self.DEFAULT_BOX_ART = ImageTk.PhotoImage(Image.open(FileConstants.PREVIEW_BOX_ART))
 
         self.applySettings()
 
@@ -74,6 +79,7 @@ class ScrollableFrame(ttk.Frame):
     def showBoxArt(self, showBoxArt):
         for streamFrame in self.streamFrames:
             if showBoxArt:
+                streamFrame.labelBoxArt.configure(image=streamFrame.boxArtImage)
                 streamFrame.labelBoxArt.grid(row=1, column=0, sticky=SW, padx=4, pady=4)
             else:
                 streamFrame.labelBoxArt.grid_forget()
@@ -128,45 +134,61 @@ class ScrollableFrame(ttk.Frame):
         self.refresh()
 
     def refresh(self, event=None):
-        for tag in self.parent.searchFrame.getAllSelectedTags():
-            print(tag.id)
-        self.parent.followedStreams = getAllStreamsUserFollows(self.parent.credentials.oauth, self.parent.credentials.user_id)
-        self.parent.teams = readTeams(self.parent.followedStreams)
-        refreshStreams = getLiveFollowedStreams(self.parent.credentials.oauth, [self.parent.followedStreams[i:i + 100] for i in range(0, len(self.parent.followedStreams), 100)])
-        tmpLiveList = refreshStreams
-        for streamName in self.parent.searchFrame.selectedStreamsListbox.get(0, END):
-            stream = [stream for stream in self.parent.liveStreams if stream.streamName == streamName][0]
-            if not stream.isLive(refreshStreams):
-                self.parent.searchFrame.selectedStreamsListbox.delete(self.parent.searchFrame.selectedStreamsListbox.get(0, END).index(streamName))
-        currentTeamMembers = [streamName for streamName in self.parent.teams[self.parent.searchFrame.currentTeam.get()]]
-        tmpLiveList = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
-        for stream in tmpLiveList:
-            print(stream.tagIDs)
-        self.parent.liveStreams = refreshStreams
+        print("refresh")
+        if self.parent.searchFrame.currentTeam.get() == LabelConstants.TOP_TWITCH_TEAM:
+            self.parent.topTwitchStreams = getTopTwitchStreams(self.parent.credentials)
+            filteredStreams = [stream for stream in self.parent.topTwitchStreams if
+                               not self.isFiltered(stream) and all(tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
+        else:
+            self.parent.followedStreams = getAllStreamsUserFollows(self.parent.credentials)
+            self.parent.teams = readTeams(self.parent.followedStreams)
+            refreshStreams = getLiveFollowedStreams(self.parent.credentials.oauth,
+                                                    [self.parent.followedStreams[i:i + 100] for i in range(0, len(self.parent.followedStreams), 100)])
+            tmpLiveList = refreshStreams
+            for streamName in self.parent.searchFrame.selectedStreamsListbox.get(0, END):
+                stream = [stream for stream in self.parent.liveStreams if stream.streamName == streamName][0]
+                if not stream.isLive(refreshStreams):
+                    self.parent.searchFrame.selectedStreamsListbox.delete(self.parent.searchFrame.selectedStreamsListbox.get(0, END).index(streamName))
+            self.parent.liveStreams = refreshStreams
+            currentTeamMembers = [streamName for streamName in self.parent.teams[self.parent.searchFrame.currentTeam.get()]]
+            filteredStreams = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(
+                tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
         self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] = self.parent.searchFrame.comboboxTeam.get()
         writeSettings(self.parent.settings)
-        self.addStreamFrames(tmpLiveList)
+        self.addStreamFrames(filteredStreams)
+        if not self.isProgramJustStarting:
+            threading.Thread(target=self.loadImagesIntoFrames).start()
+        else:
+            self.isProgramJustStarting = False
+
+    def loadImagesIntoFrames(self):
+        print("Loading images...")
+        for streamFrame in self.streamFrames:
+            streamFrame.stream.setImagesFromURL()
+            streamFrame.previewImage = streamFrame.stream.loadedPreviewImage
+            streamFrame.boxArtImage = streamFrame.stream.loadedBoxArtImage
+        self.enforceSettings()
+        print("Load complete!")
 
     def isNotSelected(self, stream, tmpSelectedList) -> bool:
         return stream not in tmpSelectedList
 
     def addStreamFrames(self, streams: List[Stream]):
+        self.currentRow = 0
+        self.currentColumn = 0
         for streamFrame in self.streamFrames:
             streamFrame.frame.grid_forget()
             streamFrame.frame.destroy()
         self.streamFrames = []
-        self.currentRow = 0
-        self.currentColumn = 0
         for stream in streams:
             self.addStreamFrame(stream)
-        self.enforceSettings()
 
     def enforceSettings(self):
-        if self.parent.hideBoxArt.get():
-            self.showBoxArt(False)
-        else:
-            self.showBoxArt(True)
         if self.parent.hideThumbnail.get():
             self.showThumbnails(False)
         else:
             self.showThumbnails(True)
+        if self.parent.hideBoxArt.get():
+            self.showBoxArt(False)
+        else:
+            self.showBoxArt(True)
