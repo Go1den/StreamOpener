@@ -140,7 +140,16 @@ class ScrollableFrame(ttk.Frame):
         writeSettings(self.parent.settings)
         self.refresh()
 
+    def clearScrollableFrame(self):
+        self.currentRow = 0
+        self.currentColumn = 0
+        for streamFrame in self.streamFrames:
+            streamFrame.frame.grid_forget()
+            streamFrame.frame.destroy()
+        self.streamFrames = []
+
     def refresh(self, event=None):
+        self.clearScrollableFrame()
         if not self.isProgramJustStarting:
             updatingStreamsWindow = UpdatingStreamsWindow(self.parent)
         if self.parent.searchFrame.currentTeam.get() == LabelConstants.TOP_TWITCH_TEAM:
@@ -165,10 +174,17 @@ class ScrollableFrame(ttk.Frame):
         writeSettings(self.parent.settings)
         self.addStreamFrames(filteredStreams)
         if not self.isProgramJustStarting:
+            for streamFrame in self.streamFrames:
+                threading.Thread(target=self.loadImageIntoFrame, args=[streamFrame]).start()
             updatingStreamsWindow.window.destroy()
-            threading.Thread(target=self.loadImagesIntoFrames).start()
         else:
             self.isProgramJustStarting = False
+
+    def loadImageIntoFrame(self, streamFrame):
+        streamFrame.stream.setImagesFromURL()
+        streamFrame.previewImage = streamFrame.stream.loadedPreviewImage
+        streamFrame.boxArtImage = streamFrame.stream.loadedBoxArtImage
+        self.enforceSettings(streamFrame)
 
     def loadImagesIntoFrames(self):
         for streamFrame in self.streamFrames:
@@ -181,12 +197,6 @@ class ScrollableFrame(ttk.Frame):
         return stream not in tmpSelectedList
 
     def addStreamFrames(self, streams: List[Stream]):
-        self.currentRow = 0
-        self.currentColumn = 0
-        for streamFrame in self.streamFrames:
-            streamFrame.frame.grid_forget()
-            streamFrame.frame.destroy()
-        self.streamFrames = []
         for stream in streams:
             self.addStreamFrame(stream)
 

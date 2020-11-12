@@ -27,7 +27,7 @@ def readTeams(followedStreams: List[dict]) -> OrderedDict:
 def writeTeams(teams: OrderedDict):
     teamsDict = {"teams": {}}
     for item in teams.items():
-        if item[0] != LabelConstants.ALL_TEAM:
+        if item[0] != LabelConstants.ALL_TEAM and item[0] != LabelConstants.TOP_TWITCH_TEAM:
             teamsDict["teams"][item[0]] = item[1]
     jsonTeams = json.dumps(teamsDict, indent=2)
     with open(FileConstants.TEAMS, "w") as f:
