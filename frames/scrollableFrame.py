@@ -1,5 +1,5 @@
 import threading
-from tkinter import ttk, NSEW, Canvas, SW, messagebox, BooleanVar, END
+from tkinter import ttk, NSEW, Canvas, SW, messagebox, BooleanVar, END, Frame
 from typing import List
 
 from PIL import ImageTk, Image
@@ -19,7 +19,7 @@ class ScrollableFrame(ttk.Frame):
         super().__init__(parent.windowFrame, *args, **kwargs)
         self.canvas = Canvas(self)
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.scrollable_frame = ttk.Frame(self.canvas)
+        self.scrollable_frame = Frame(self.canvas)
         self.streamFrames = []
         self.parent = parent
         self.searchFrame = self.parent.searchFrame
@@ -149,6 +149,8 @@ class ScrollableFrame(ttk.Frame):
         self.streamFrames = []
 
     def refresh(self, event=None):
+        self.canvas.yview_moveto(0.0)
+        self.scrollbar.set(0.0, 1.0)
         self.clearScrollableFrame()
         if not self.isProgramJustStarting:
             updatingStreamsWindow = UpdatingStreamsWindow(self.parent)
@@ -162,10 +164,6 @@ class ScrollableFrame(ttk.Frame):
             refreshStreams = getLiveFollowedStreams(self.parent.credentials.oauth,
                                                     [self.parent.followedStreams[i:i + 100] for i in range(0, len(self.parent.followedStreams), 100)])
             tmpLiveList = refreshStreams
-            for streamName in self.parent.searchFrame.selectedStreamsListbox.get(0, END):
-                stream = [stream for stream in self.parent.liveStreams if stream.streamName == streamName][0]
-                if not stream.isLive(refreshStreams):
-                    self.parent.searchFrame.selectedStreamsListbox.delete(self.parent.searchFrame.selectedStreamsListbox.get(0, END).index(streamName))
             self.parent.liveStreams = refreshStreams
             currentTeamMembers = [streamName for streamName in self.parent.teams[self.parent.searchFrame.currentTeam.get()]]
             filteredStreams = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(

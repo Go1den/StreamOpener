@@ -1,5 +1,4 @@
 from tkinter import Toplevel, Frame, NSEW, E, Label, Entry, StringVar, Button, W, messagebox
-from tkinter.ttk import Combobox
 
 from constants.labelConstants import LabelConstants
 from constants.messageConstants import MessageConstants
@@ -17,6 +16,7 @@ class NewFilterWindow:
 
         self.comboboxStream = None
         self.game = StringVar()
+        self.streamer = StringVar()
 
         WindowHelper.initializeWindow(self.window, self.parent, 324, 140, 30, 50, LabelConstants.NEW_FILTER_WINDOW)
         self.gridFrames()
@@ -33,8 +33,8 @@ class NewFilterWindow:
         labelInstructions.grid(row=0, column=0, columnspan=2, sticky=W, padx=4, pady=4)
         labelStream = Label(self.entryFrame, text=LabelConstants.STREAMER)
         labelStream.grid(row=1, column=0, sticky=E, padx=4, pady=4)
-        self.comboboxStream = Combobox(self.entryFrame, values=self.parent.parent.teams[LabelConstants.ALL_TEAM], state="readonly")
-        self.comboboxStream.grid(row=1, column=1, sticky=W, padx=(0, 4), pady=4)
+        entryStream = Entry(self.entryFrame, textvariable=self.streamer, width=40)
+        entryStream.grid(row=1, column=1, sticky=W, padx=(0, 4), pady=4)
         labelGame = Label(self.entryFrame, text=LabelConstants.GAME)
         labelGame.grid(row=2, column=0, sticky=E, padx=4, pady=4)
         entryGame = Entry(self.entryFrame, textvariable=self.game, width=40)
@@ -48,7 +48,7 @@ class NewFilterWindow:
 
     def ok(self):
         game = self.game.get().strip()
-        streamer = self.comboboxStream.get()
+        streamer = self.streamer.get().strip()
         if not game and not streamer:
             messagebox.showerror(LabelConstants.ERROR, MessageConstants.NO_FILTER_INFO_PROVIDED)
         if game and not isRecognizedTwitchGame(self.parent.parent.credentials.oauth, game):
