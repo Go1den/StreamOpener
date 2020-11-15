@@ -1,7 +1,7 @@
 import sys
 import webbrowser
 from copy import deepcopy
-from tkinter import Tk, NSEW, Frame, Menu, BooleanVar
+from tkinter import Tk, NSEW, Frame, Menu, BooleanVar, IntVar
 
 from constants.fileConstants import FileConstants
 from constants.labelConstants import LabelConstants
@@ -35,6 +35,7 @@ class MainWindow:
         self.hideThumbnail = BooleanVar()
         self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
+        self.autoRefreshLength = IntVar()
 
         self.scrollableFrame = ScrollableFrame(1010, 680, self)
         self.liveStreams = getLiveFollowedStreams(credentials.oauth, [self.followedStreams[i:i + 100] for i in range(0, len(self.followedStreams), 100)])
@@ -73,6 +74,14 @@ class MainWindow:
         settingsMenu.add_checkbutton(label=LabelConstants.HIDE_THUMBNAIL, variable=self.hideThumbnail, command=lambda: self.toggleThumbnail())
         settingsMenu.add_checkbutton(label=LabelConstants.HIDE_BOXART, variable=self.hideBoxArt, command=lambda: self.toggleBoxArt())
         settingsMenu.add_checkbutton(label=LabelConstants.ENABLE_FILTERS, variable=self.scrollableFrame.enableFilters, command=lambda: self.scrollableFrame.toggleFilters())
+
+        autoRefreshMenu = Menu(settingsMenu, tearoff=0)
+        autoRefreshMenu.add_radiobutton(label=LabelConstants.AUTO_REFRESH_ZERO, var=self.autoRefreshLength, value=0, command=lambda: self.scrollableFrame.setAutoRefreshLength(0))
+        autoRefreshMenu.add_radiobutton(label=LabelConstants.AUTO_REFRESH_ONE, var=self.autoRefreshLength, value=1, command=lambda: self.scrollableFrame.setAutoRefreshLength(1))
+        autoRefreshMenu.add_radiobutton(label=LabelConstants.AUTO_REFRESH_FIVE, var=self.autoRefreshLength, value=5, command=lambda: self.scrollableFrame.setAutoRefreshLength(5))
+        autoRefreshMenu.add_radiobutton(label=LabelConstants.AUTO_REFRESH_TEN, var=self.autoRefreshLength, value=10, command=lambda: self.scrollableFrame.setAutoRefreshLength(10))
+
+        settingsMenu.add_cascade(label=LabelConstants.AUTO_REFRESH, menu=autoRefreshMenu)
         menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)
@@ -126,6 +135,8 @@ class MainWindow:
             self.searchFrame.site.set(URLConstants.ORDERED_STREAMING_SITES[LabelConstants.URL_TWITCH])
         if MiscConstants.KEY_TEAM in self.settings[LabelConstants.SETTINGS_JSON] and self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] in self.teams.keys():
             self.searchFrame.currentTeam.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
+        if MiscConstants.KEY_AUTOREFRESH in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.autoRefreshLength.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_AUTOREFRESH])
 
     def setTags(self, tags):
         self.tags = deepcopy(tags)

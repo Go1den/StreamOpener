@@ -57,6 +57,8 @@ def populateMissingSettings(settings) -> dict:
         settings["settings"][MiscConstants.KEY_TEAM] = LabelConstants.ALL_TEAM
     if MiscConstants.KEY_FILTERS not in settings["settings"]:
         settings["settings"][MiscConstants.KEY_FILTERS] = False
+    if MiscConstants.KEY_AUTOREFRESH not in settings["settings"]:
+        settings["settings"][MiscConstants.KEY_AUTOREFRESH] = 0
     return settings
 
 def writeSettings(settings: dict):

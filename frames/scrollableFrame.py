@@ -1,4 +1,5 @@
 import threading
+import time
 from tkinter import ttk, NSEW, Canvas, SW, messagebox, BooleanVar, END, Frame
 from typing import List
 
@@ -28,6 +29,8 @@ class ScrollableFrame(ttk.Frame):
         self.currentColumn = 0
         self.filters = readFilters()
         self.enableFilters = BooleanVar()
+        self.autoRefreshLength = 1
+        self.lastRefreshTime = None
 
         self.isProgramJustStarting = True
 
@@ -46,10 +49,13 @@ class ScrollableFrame(ttk.Frame):
         self.scrollable_frame.bind('<Enter>', self.bindMouseWheel)
         self.scrollable_frame.bind('<Leave>', self.unbindMouseWheel)
         self.refresh()
+        threading.Thread(target=self.autoRefresh, daemon=True).start()
 
     def applySettings(self):
         if MiscConstants.KEY_FILTERS in self.parent.settings[LabelConstants.SETTINGS_JSON]:
             self.enableFilters.set(self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_FILTERS])
+        if MiscConstants.KEY_AUTOREFRESH in self.parent.settings[LabelConstants.SETTINGS_JSON]:
+            self.autoRefreshLength = self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_AUTOREFRESH]
 
     def bindMouseWheel(self, event):
         self.canvas.bind_all("<MouseWheel>", self.onMouseWheel)
@@ -129,9 +135,10 @@ class ScrollableFrame(ttk.Frame):
     def isFiltered(self, stream):
         if self.enableFilters.get():
             isGameFiltered = stream.gameTitle in [x["description"] for x in self.filters["filters"][LabelConstants.FILTER_KEY_GAME]]
-            isStreamFiltered = stream.stylizedStreamName in [x["description"] for x in self.filters["filters"][LabelConstants.FILTER_KEY_STREAMER]]
-            isComboFiltered = stream.stylizedStreamName + " streaming " + stream.gameTitle in [x["description"] for x in
-                                                                                               self.filters["filters"][LabelConstants.FILTER_KEY_COMBINED]]
+            isStreamFiltered = any(s in [x["description"].lower() for x in self.filters["filters"][LabelConstants.FILTER_KEY_STREAMER]]
+                                   for s in (stream.stylizedStreamName.lower(), stream.streamName.lower()))
+            isComboFiltered = any(s in [x["description"].lower() for x in self.filters["filters"][LabelConstants.FILTER_KEY_COMBINED]]
+                                  for s in ((stream.stylizedStreamName + " streaming " + stream.gameTitle).lower(), (stream.streamName + " streaming " + stream.gameTitle).lower()))
             return isGameFiltered or isStreamFiltered or isComboFiltered
         return False
 
@@ -166,17 +173,26 @@ class ScrollableFrame(ttk.Frame):
             tmpLiveList = refreshStreams
             self.parent.liveStreams = refreshStreams
             currentTeamMembers = [streamName for streamName in self.parent.teams[self.parent.searchFrame.currentTeam.get()]]
-            filteredStreams = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(
-                tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
+            if self.parent.searchFrame.currentTeam.get() == LabelConstants.ALL_TEAM:
+                filteredStreams = [stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName in currentTeamMembers and all(
+                    tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
+            else:
+                filteredStreams = []
+                for teamMember in currentTeamMembers:
+                    matchingStream = next((stream for stream in tmpLiveList if not self.isFiltered(stream) and stream.stylizedStreamName == teamMember and all(
+                        tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())), None)
+                    if matchingStream:
+                        filteredStreams.append(matchingStream)
         self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM] = self.parent.searchFrame.comboboxTeam.get()
         writeSettings(self.parent.settings)
         self.addStreamFrames(filteredStreams)
         if not self.isProgramJustStarting:
             for streamFrame in self.streamFrames:
-                threading.Thread(target=self.loadImageIntoFrame, args=[streamFrame]).start()
+                threading.Thread(target=self.loadImageIntoFrame, args=[streamFrame], daemon=True).start()
             updatingStreamsWindow.window.destroy()
         else:
             self.isProgramJustStarting = False
+        self.lastRefreshTime = time.time()
 
     def loadImageIntoFrame(self, streamFrame):
         streamFrame.stream.setImagesFromURL()
@@ -207,3 +223,16 @@ class ScrollableFrame(ttk.Frame):
             self.showBoxArt(False, streamFrame)
         else:
             self.showBoxArt(True, streamFrame)
+
+    def autoRefresh(self):
+        while True:
+            if self.autoRefreshLength > 0 and self.lastRefreshTime + (60 * self.autoRefreshLength) < time.time():
+                self.refresh()
+            else:
+                time.sleep(5)
+
+    def setAutoRefreshLength(self, length):
+        self.autoRefreshLength = length
+        self.parent.autoRefreshLength.set(length)
+        self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_AUTOREFRESH] = length
+        writeSettings(self.parent.settings)
