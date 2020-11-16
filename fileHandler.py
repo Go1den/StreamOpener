@@ -59,6 +59,8 @@ def populateMissingSettings(settings) -> dict:
         settings["settings"][MiscConstants.KEY_FILTERS] = False
     if MiscConstants.KEY_AUTOREFRESH not in settings["settings"]:
         settings["settings"][MiscConstants.KEY_AUTOREFRESH] = 0
+    if MiscConstants.KEY_DESKTOP_NOTIFICATIONS not in settings["settings"]:
+        settings["settings"][MiscConstants.KEY_DESKTOP_NOTIFICATIONS] = False
     return settings
 
 def writeSettings(settings: dict):

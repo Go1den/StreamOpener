@@ -231,7 +231,8 @@ class ScrollableFrame(ttk.Frame):
                 previouslyLiveStreams = self.parent.liveStreams
                 self.refresh()
                 refreshedLiveStreams = self.parent.liveStreams
-                threading.Thread(target=toast, args=(previouslyLiveStreams, refreshedLiveStreams), daemon=True).start()
+                if self.parent.enableDesktopNotifications.get():
+                    threading.Thread(target=toast, args=(previouslyLiveStreams, refreshedLiveStreams), daemon=True).start()
             else:
                 time.sleep(5)
 

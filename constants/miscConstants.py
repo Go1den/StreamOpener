@@ -1,4 +1,5 @@
 class MiscConstants:
+    KEY_DESKTOP_NOTIFICATIONS = "enableDesktopNotifications"
     KEY_AUTOREFRESH = "autoRefreshLength"
     KEY_HIDE_BOXART = "hideBoxArt"
     BEARER = "Bearer "

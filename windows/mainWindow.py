@@ -35,6 +35,7 @@ class MainWindow:
         self.hideThumbnail = BooleanVar()
         self.hideBoxArt = BooleanVar()
         self.enableFilters = BooleanVar()
+        self.enableDesktopNotifications = BooleanVar()
         self.autoRefreshLength = IntVar()
 
         self.scrollableFrame = ScrollableFrame(1010, 680, self)
@@ -82,6 +83,7 @@ class MainWindow:
         autoRefreshMenu.add_radiobutton(label=LabelConstants.AUTO_REFRESH_TEN, var=self.autoRefreshLength, value=10, command=lambda: self.scrollableFrame.setAutoRefreshLength(10))
 
         settingsMenu.add_cascade(label=LabelConstants.AUTO_REFRESH, menu=autoRefreshMenu)
+        settingsMenu.add_checkbutton(label=LabelConstants.DESKTOP_NOTIFICATIONS, variable=self.enableDesktopNotifications, command=lambda: self.toggleDesktopNotifications())
         menu.add_cascade(label=LabelConstants.SETTINGS_MENU, menu=settingsMenu)
 
         issueMenu = Menu(menu, tearoff=0)
@@ -120,6 +122,10 @@ class MainWindow:
         self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_BOXART] = self.hideBoxArt.get()
         writeSettings(self.settings)
 
+    def toggleDesktopNotifications(self):
+        self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_DESKTOP_NOTIFICATIONS] = self.enableDesktopNotifications.get()
+        writeSettings(self.settings)
+
     def applySettings(self):
         if MiscConstants.KEY_HIDE_THUMBNAIL in self.settings[LabelConstants.SETTINGS_JSON]:
             self.hideThumbnail.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_HIDE_THUMBNAIL])
@@ -137,6 +143,8 @@ class MainWindow:
             self.searchFrame.currentTeam.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_TEAM])
         if MiscConstants.KEY_AUTOREFRESH in self.settings[LabelConstants.SETTINGS_JSON]:
             self.autoRefreshLength.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_AUTOREFRESH])
+        if MiscConstants.KEY_DESKTOP_NOTIFICATIONS in self.settings[LabelConstants.SETTINGS_JSON]:
+            self.enableDesktopNotifications.set(self.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_DESKTOP_NOTIFICATIONS])
 
     def setTags(self, tags):
         self.tags = deepcopy(tags)

@@ -1,4 +1,5 @@
 class LabelConstants:
+    DESKTOP_NOTIFICATIONS = "Desktop Notifications"
     AUTO_REFRESH_TEN = "Every 10 Minutes"
     AUTO_REFRESH_FIVE = "Every 5 Minutes"
     AUTO_REFRESH_ONE = "Every Minute"
