@@ -3,4 +3,4 @@ def sanitize(phrase: str) -> str:
     result = ''
     for char in char_list:
         result += char
-    return result
+    return result.replace('\r', ' ').replace('\n', ' ').strip()

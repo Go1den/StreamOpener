@@ -10,7 +10,8 @@ from constants.miscConstants import MiscConstants
 def readTeams(followedStreams: List[dict]) -> OrderedDict:
     allTeam = [stream["to_name"] for stream in followedStreams]
     result = OrderedDict()
-    result["All"] = sorted(allTeam, key=str.casefold)
+    result[LabelConstants.ALL_TEAM] = allTeam
+    result[LabelConstants.TOP_TWITCH_TEAM] = []
     try:
         with open(FileConstants.TEAMS, "r") as f:
             teamsJson = f.read()
@@ -26,7 +27,7 @@ def readTeams(followedStreams: List[dict]) -> OrderedDict:
 def writeTeams(teams: OrderedDict):
     teamsDict = {"teams": {}}
     for item in teams.items():
-        if item[0] != LabelConstants.ALL_TEAM:
+        if item[0] != LabelConstants.ALL_TEAM and item[0] != LabelConstants.TOP_TWITCH_TEAM:
             teamsDict["teams"][item[0]] = item[1]
     jsonTeams = json.dumps(teamsDict, indent=2)
     with open(FileConstants.TEAMS, "w") as f:
@@ -43,6 +44,8 @@ def readSettings():
     except FileNotFoundError:
         return populateMissingSettings({"settings": {}})
 
+# TODO add remove unused settings method
+
 def populateMissingSettings(settings) -> dict:
     if MiscConstants.KEY_OPEN_STREAMS_ON not in settings["settings"]:
         settings["settings"][MiscConstants.KEY_OPEN_STREAMS_ON] = LabelConstants.URL_TWITCH
@@ -54,6 +57,10 @@ def populateMissingSettings(settings) -> dict:
         settings["settings"][MiscConstants.KEY_TEAM] = LabelConstants.ALL_TEAM
     if MiscConstants.KEY_FILTERS not in settings["settings"]:
         settings["settings"][MiscConstants.KEY_FILTERS] = False
+    if MiscConstants.KEY_AUTOREFRESH not in settings["settings"]:
+        settings["settings"][MiscConstants.KEY_AUTOREFRESH] = 0
+    if MiscConstants.KEY_DESKTOP_NOTIFICATIONS not in settings["settings"]:
+        settings["settings"][MiscConstants.KEY_DESKTOP_NOTIFICATIONS] = False
     return settings
 
 def writeSettings(settings: dict):

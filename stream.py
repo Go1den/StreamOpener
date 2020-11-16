@@ -1,6 +1,14 @@
+import io
+from urllib.request import urlopen
+
+from PIL import ImageTk, Image
+
 from sanitize import sanitize
 
 class Stream:
+    DEFAULT_BOX_ART = None
+    DEFAULT_STREAM_PREVIEW = None
+
     def __init__(self, stream, gameTitle, boxArtURL):
         self.ID = stream['id']
         self.viewerCount = sanitize(str(stream['viewer_count']))
@@ -19,8 +27,31 @@ class Stream:
         self.streamName = sanitize(stream['thumbnail_url'][52:].split('-')[0])
         self.boxArtURL = boxArtURL
 
+        self.loadedBoxArtImage = None
+        self.loadedPreviewImage = None
+
     def isLive(self, streams) -> bool:
         for stream in streams:
             if stream.streamName == self.streamName:
                 return True
         return False
+
+    def setBoxArtImageFromURL(self):
+        try:
+            rawData = urlopen(self.boxArtURL).read()
+            im = Image.open(io.BytesIO(rawData))
+            self.loadedBoxArtImage = ImageTk.PhotoImage(im)
+        except ValueError:
+            self.loadedBoxArtImage = self.DEFAULT_BOX_ART
+
+    def setPreviewImageFromURL(self):
+        try:
+            rawData = urlopen(self.previewImage).read()
+            im = Image.open(io.BytesIO(rawData))
+            self.loadedPreviewImage = ImageTk.PhotoImage(im)
+        except ValueError:
+            self.loadedPreviewImage = self.DEFAULT_STREAM_PREVIEW
+
+    def setImagesFromURL(self):
+        self.setBoxArtImageFromURL()
+        self.setPreviewImageFromURL()

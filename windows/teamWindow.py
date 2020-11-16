@@ -158,7 +158,7 @@ class TeamWindow:
         if self.pageLoaded and self.currentTeam is not None and len(self.currentTeam) > 0:
             self.storeCurrentTeamChanges(self.currentTeam)
         teamMembers = self.teams[self.comboboxTeam.get()]
-        freeAgents = [x for x in self.teams[LabelConstants.ALL_TEAM] if x not in teamMembers]
+        freeAgents = sorted([x for x in self.teams[LabelConstants.ALL_TEAM] if x not in teamMembers], key=str.casefold)
         self.clearListboxes()
         for streamer in freeAgents:
             self.freeAgentListbox.insert(END, streamer)
@@ -193,7 +193,7 @@ class TeamWindow:
             self.buttonDownArrow.configure(state=NORMAL)
 
     def getListOfTeams(self) -> List[str]:
-        return list(key for key in self.teams.keys() if key != LabelConstants.ALL_TEAM)
+        return list(key for key in self.teams.keys() if key != LabelConstants.ALL_TEAM and key != LabelConstants.TOP_TWITCH_TEAM)
 
     def rename(self):
         if self.comboboxTeam.current() >= 0:

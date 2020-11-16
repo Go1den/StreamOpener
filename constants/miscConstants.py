@@ -1,4 +1,7 @@
 class MiscConstants:
+    KEY_DESKTOP_NOTIFICATIONS = "enableDesktopNotifications"
+    KEY_AUTOREFRESH = "autoRefreshLength"
+    KEY_HIDE_BOXART = "hideBoxArt"
     BEARER = "Bearer "
     CLIENT_ID = "dzdcecm2nwr4j6ywb349cyvv81i9sv"
     OAUTH = "OAuth "
@@ -10,3 +13,4 @@ class MiscConstants:
     KEY_OPEN_STREAMS_ON = "openStreamsOn"
     KEY_TEAM = "team"
     KEY_FILTERS = "enableFilters"
+    BIND_LEFT_MOUSE = "<Button-1>"

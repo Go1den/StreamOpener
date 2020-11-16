@@ -1,4 +1,5 @@
 class FileConstants:
+    TAGS = "tags.json"
     OAUTH = "oauth.txt"
     PREVIEW_BOX_ART = "previewboxart.png"
     STREAM_PREVIEW = "streampreview.png"
