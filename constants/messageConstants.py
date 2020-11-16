@@ -16,3 +16,4 @@ class MessageConstants:
     INVALID_GAME = "Game not recognized by Twitch. Please enter the game name exactly as it appears on Twitch."
     ACCESS_TOKEN = "Please enter the access_token from the URL you were redirected to."
     TAGS_ADDED = "{0} new Twitch tags were found and added to your Tag library."
+    TOAST = "{0} is live on Twitch!"

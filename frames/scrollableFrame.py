@@ -12,6 +12,7 @@ from constants.miscConstants import MiscConstants
 from fileHandler import writeFilters, readFilters, writeSettings, readTeams
 from frames.streamFrame import StreamFrame
 from stream import Stream
+from toasts import toast
 from twitchapi import getAllStreamsUserFollows, getLiveFollowedStreams, getTopTwitchStreams
 from windows.updatingStreamsWindow import UpdatingStreamsWindow
 
@@ -156,14 +157,14 @@ class ScrollableFrame(ttk.Frame):
         self.streamFrames = []
 
     def refresh(self, event=None):
+        if not self.isProgramJustStarting:
+            updatingStreamsWindow = UpdatingStreamsWindow(self.parent)
         self.canvas.yview_moveto(0.0)
         self.scrollbar.set(0.0, 1.0)
         self.clearScrollableFrame()
-        if not self.isProgramJustStarting:
-            updatingStreamsWindow = UpdatingStreamsWindow(self.parent)
         if self.parent.searchFrame.currentTeam.get() == LabelConstants.TOP_TWITCH_TEAM:
-            self.parent.topTwitchStreams = getTopTwitchStreams(self.parent.credentials)
-            filteredStreams = [stream for stream in self.parent.topTwitchStreams if
+            self.parent.liveStreams = getTopTwitchStreams(self.parent.credentials)
+            filteredStreams = [stream for stream in self.parent.liveStreams if
                                not self.isFiltered(stream) and all(tag.id in stream.tagIDs for tag in self.parent.searchFrame.getAllSelectedTags())]
         else:
             self.parent.followedStreams = getAllStreamsUserFollows(self.parent.credentials)
@@ -227,7 +228,10 @@ class ScrollableFrame(ttk.Frame):
     def autoRefresh(self):
         while True:
             if self.autoRefreshLength > 0 and self.lastRefreshTime + (60 * self.autoRefreshLength) < time.time():
+                previouslyLiveStreams = self.parent.liveStreams
                 self.refresh()
+                refreshedLiveStreams = self.parent.liveStreams
+                threading.Thread(target=toast, args=(previouslyLiveStreams, refreshedLiveStreams), daemon=True).start()
             else:
                 time.sleep(5)
 

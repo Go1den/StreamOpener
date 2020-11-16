@@ -118,8 +118,8 @@ class SearchFrame:
         self.siteDropdown.grid(row=1, column=0, sticky=NSEW, padx=4, pady=4)
 
     def populateStreamStartButtonFrame(self):
-        self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=32, command=lambda: self.openURL())
-        self.buttonOk.grid(row=0, column=0, sticky=NSEW, pady=4)
+        self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=32, height=2, command=lambda: self.openURL())
+        self.buttonOk.grid(row=0, column=0, sticky="new", pady=(0,4))
 
     def addFilter(self):
         messagebox.showinfo("Ok", "Filter added.")
