@@ -121,9 +121,6 @@ class SearchFrame:
         self.buttonOk = Button(self.streamStartButtonFrame, text=LabelConstants.OPEN_STREAMS, width=32, height=2, command=lambda: self.openURL())
         self.buttonOk.grid(row=0, column=0, sticky="new", pady=(0,4))
 
-    def addFilter(self):
-        messagebox.showinfo("Ok", "Filter added.")
-
     def clearAllTags(self):
         self.appliedFiltersListbox.selection_clear(0, END)
 
@@ -135,9 +132,6 @@ class SearchFrame:
         for idx in reversed(self.selectedStreamsListbox.curselection()):
             self.selectedStreamsListbox.delete(idx)
         self.parent.scrollableFrame.updateStreamFrameBorders(self.selectedStreamsListbox.get(0, END))
-
-    def applyTags(self):
-        messagebox.showinfo("Ok", "Reset")
 
     def updateURLSetting(self, event=None):
         self.parent.settings[LabelConstants.SETTINGS_JSON][MiscConstants.KEY_OPEN_STREAMS_ON] = self.siteDropdown.get()

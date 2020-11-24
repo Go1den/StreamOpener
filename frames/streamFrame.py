@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END, PhotoImage, LEFT, RIGHT
+from tkinter import Frame, Label, W, NSEW, Button, StringVar, SE, SW, S, GROOVE, NW, END, PhotoImage, RIGHT
 
 from constants.labelConstants import LabelConstants
 from constants.miscConstants import MiscConstants
@@ -60,7 +60,8 @@ class StreamFrame:
         dummyImageToMakeLabelHaveWidthInPixels = PhotoImage(width=1, height=1)
         dummyLabelToGetWidthOfText = Label(None, textvariable=self.previewTitle)
         titleWidth = min(dummyLabelToGetWidthOfText.winfo_reqwidth() - 4, 308)
-        labelTitle = Label(self.previewFrame, image=dummyImageToMakeLabelHaveWidthInPixels, textvariable=self.previewTitle, fg="white", bg="black", compound=RIGHT, anchor=W, width=titleWidth)
+        labelTitle = Label(self.previewFrame, image=dummyImageToMakeLabelHaveWidthInPixels, textvariable=self.previewTitle, fg="white", bg="black", compound=RIGHT, anchor=W,
+                           width=titleWidth)
         labelTitle.bind(MiscConstants.BIND_LEFT_MOUSE, lambda x: self.onClick(None))
         labelTitle.grid(row=1, sticky=NW, padx=4, pady=4)
         self.labelBoxArt = Label(self.previewFrame, image=self.boxArtImage, bd=1)
