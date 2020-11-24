@@ -153,10 +153,8 @@ def readTags(oAuth) -> List[Tag]:
         tagList = [Tag(None, t["id"], t["isAuto"], t["localizationNames"], t["isActive"]) for t in tags]
         return sorted(tagList, key=lambda x: x.localizationNames["en-us"].casefold())
     except JSONDecodeError:
-        print("JSON decode error. Updating tags.")
         return updateTwitchTags(oAuth, [], True)
     except FileNotFoundError:
-        print("No file found. Updating tags.")
         return updateTwitchTags(oAuth, [], True)
 
 def writeTags(tags: List[Tag]):
